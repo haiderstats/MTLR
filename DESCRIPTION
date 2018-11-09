@@ -1,0 +1,22 @@
+Package: MTLR
+Type: Package
+Title: An Implementation of Mutli-Task Logistic Regression
+Version: 0.1.0
+Author: Humza Haider
+Maintainer: Humza Haider <hshaider@ualberta.ca>
+Description: Implementation of Mutli-task Logistic regression. 
+    blah blah blah
+    blah blah blah.
+License: GPL
+Encoding: UTF-8
+LazyData: true
+Imports:
+    Rcpp (>= 0.12.18),
+    survival (>= 2.42-6),
+Suggests:
+    ggplot2 (>= 3.0.0)
+Depends: R (>= 3.4.4)
+RoxygenNote: 6.1.1
+LinkingTo:
+    Rcpp,
+    RcppArmadillo
