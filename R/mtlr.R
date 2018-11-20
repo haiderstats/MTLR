@@ -2,18 +2,24 @@
 
 
 
-mltr <- function(formula,
+mtlr <- function(formula,
                  data,
                  nintervals = NULL,
                  C1 = 1,
-                 threshold = 1e-5,
+                 normalize = T,
+                 threshold = 1e-05,
                  maxit = 5000,
-                 normalize = T){
+                 lower = -20,
+                 upper = 20,
+                 train_biases = T){
   cl <- match.call() #Save a copy of the function call.
 
   #Data setup
-  mf <- model.frame(formula = formula, data = data)
-  x <- model.matrix(attr(mf, "terms"), data = mf)
+  mf <- model.frame(formula = formula, data)
+  Terms <- attr(mf, "terms")
+  xlevels <-.getXlevels(Terms, mf)
+
+  x <- model.matrix(Terms, data = mf)
   x <- x[,-1] #Remove intercept term -- We will handle biases later.
   y <- model.response(mf)
 
@@ -33,8 +39,17 @@ mltr <- function(formula,
     stop("C1 must be non-negative.")
   if(threshold <= 0)
     stop("The threshold must be positive.")
+
   if(is.null(nintervals))
     nintervals <- sqrt(ceiling(nrow(y))) #Default number of intervals is the sq. root of the number of observations.
+  if(normalize){
+    x <- scale(x)
+    scale_centers <- attr(x, "scaled:center")
+    scale_scale <- attr(x,"scaled:scale")
+    scales = list(center= scale_centers, sd = scale_scale)
+  }else{
+    scales = NULL
+  }
 
   ##############################################################
   #Prepare data for MTLR Rcpp functions.
@@ -42,36 +57,61 @@ mltr <- function(formula,
   #Here we order our data by the censor status.
   ord = order(delta)
 
-  x = x[ord,]
+  x <- x[ord,]
 
-  m = nintervals + 1   #The number of time points to evaulate will be the number of time intervals + 1.
+  m <- nintervals + 1   #The number of time points to evaulate will be the number of time intervals + 1.
   quantiles <- seq(0,1,length.out = m+2)[-c(1,m+2)] #We will select time point based on the distribution of the times.
   time_points <- unname(quantile(time, quantiles))
 
 
   time_points <- time_points[!duplicated(time_points)]#Small data (or common event times) we will have duplicated time points -- we remove them.
 
-  zero_matrix = matrix(0,ncol = ncol(x), nrow = nrow(x))   #We create a zero_matrix to train the biases
-
   #We make a matrix where each column is a vector of indicators if an observation is dead at each time point, e.g. (0,0,,...,0,1,1,...1).
   #(See 'Learning Patient-Specific Cancer Survival Distributions as a Sequence of Dependent Regressors' Page 3.)
-  y_matrix = matrix(1 - Reduce(c,Map(function(ind) time > time_points[ind], seq_along(time_points))), ncol = nrow(x), byrow = T)
+  y_matrix = matrix(1 - Reduce(c,Map(function(ind) time[ord] > time_points[ind], seq_along(time_points))), ncol = nrow(x), byrow = T)
 
   #We first train the biases (by setting feature parameters to zero (dAsZero)). Then we train the feature values as if all patients
   #were uncensored (this creates "good" starting values since with censored patients the objective is non-convex). Then we finally
   #train the data with their true censor statuses.
-  bias_par = optim(par = rep(0,length(timePoints)*(ncol(d) +1)),fn = mtlr_objVal,gr = mtlr_grad, yval = yval,
-                  featureVal = dAsZero,C1=C1, delta = sort(training$delta),
-                  method = "L-BFGS-B", lower = -20,upper=20,control=c(maxit = 5000, factr = .45036e11))
+  threshold_factor = threshold/.Machine$double.eps
 
-  allParamsUnc = optim(par = biasPar$par,fn = mtlr_objVal,gr = mtlr_grad, yval = yval, featureVal = d,C1=C1,delta = rep(1,nrow(training)),
-                       method = "L-BFGS-B", lower = -20,upper=20,control=c(maxit = 5000, factr = .45036e11))
+  if(train_biases){
+    zero_matrix <- matrix(0,ncol = ncol(x), nrow = nrow(x))   #We create a zero_matrix to train the biases
 
-  allParams = optim(par = allParamsUnc$par,fn = mtlr_objVal,gr = mtlr_grad, yval = yval, featureVal = d,C1=C1,delta = sort(training$delta),
-                    method = "L-BFGS-B", lower = -20,upper=20,control=c(maxit = 5000, factr = .45036e11))
+    bias_par <- optim(par = rep(0,length(time_points)*(ncol(x) +1)),fn = mtlr_objVal,gr = mtlr_grad, yval = y_matrix,
+                     featureVal = zero_matrix, C1=C1, delta = sort(delta),
+                     method = "L-BFGS-B", lower = lower, upper = upper, control = c(maxit = maxit, factr = threshold_factor))
+    if(bias_par$convergence == 52)
+      stop(paste("Error occured while training MTLR. Optim Error: ", bias_par$message))
+  }else{
+    bias_par <- list(par = rep(0,length(time_points)*(ncol(x) +1)))
+  }
 
+  params_uncensored <- optim(par = bias_par$par,fn = mtlr_objVal, gr = mtlr_grad, yval = y_matrix, featureVal = x, C1 = C1, delta = rep(1,nrow(x)),
+                       method = "L-BFGS-B", lower = lower, upper = upper, control = c(maxit = maxit, factr = threshold_factor))
+  if(params_uncensored$convergence == 52)
+    stop(paste("Error occured while training MTLR. Optim Error: ", params_uncensored$message))
 
-  return(0)
+  final_params <- optim(par = params_uncensored$par,fn = mtlr_objVal,gr = mtlr_grad, yval = y_matrix, featureVal = x, C1 = C1,delta = sort(delta),
+                    method = "L-BFGS-B", lower = lower, upper = upper, control = c(maxit = maxit, factr = threshold_factor))
+  if(final_params$convergence == 52)
+    stop(paste("Error occured while training MTLR. Optim Error: ", final_params$message))
+
+  weights <- matrix(final_params$par, ncol = ncol(x) + 1,byrow=FALSE)
+  colnames(weights) <- c("Bias",colnames(x))
+  rownames(weights) <- round(time_points,2)
+  x = x[order(ord),]
+  y_matrix = y_matrix[,order(ord)]
+  fit <- list(weight_matrix = weights,
+              x = x,
+              y = y_matrix,
+              time_points = time_points,
+              Call = cl,
+              Terms = Terms,
+              scale = scales,
+              xlevels = xlevels)
+  class(fit) <- "mtlr"
+  fit
 }
 
 
