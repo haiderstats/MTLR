@@ -27,14 +27,14 @@ using namespace std;
 //Here we will assume that the data is ordered such that all censored observations come first. We could abstract (fairly easily)
 //away from this requirement but then we would be doing the same operation multiple times within the bottleneck of the code.
 
-//' Calculate objective value.
-//'
-//' @param params A vector of starting weights b1,b2,...,bm,theta11,theta12,...theta1m, ...theta p 1,...,theta p m
-//' @param yval A matrix of indicators of death
-//' @param featureValue A matrix of feature values.
-//' @param C1 The regularization term.
-//' @param delta The event status indicator (1= death, 0 = censored), sorted.
-//' @export
+// //' Calculate objective value.
+// //'
+// //' @param params A vector of starting weights b1,b2,...,bm,theta11,theta12,...theta1m, ...theta p 1,...,theta p m
+// //' @param yval A matrix of indicators of death
+// //' @param featureValue A matrix of feature values.
+// //' @param C1 The regularization term.
+// //' @param delta The event status indicator (1= death, 0 = censored), sorted.
+// //' @export
 // [[Rcpp::export]]
 double mtlr_objVal(NumericVector params, arma::mat yval, arma::mat featureValue, double C1,arma::vec delta) {
   //For the objective value see Equation 3 of the MTLR paper.
@@ -109,10 +109,10 @@ double mtlr_objVal(NumericVector params, arma::mat yval, arma::mat featureValue,
 //See mtlr_objVal for argument definition.
 //Here we will assume that the data is ordered such that all censored observations come first. We could abstract (fairly easily)
 //away from this requirement but then we would be doing the same operation multiple times within the bottleneck of the code.
-//' Calculate Gradient
-//'
-//' @inheritParams mtlr_objVal
-//' @export
+// //' Calculate Gradient
+// //'
+// //' @inheritParams mtlr_objVal
+// //' @export
 // [[Rcpp::export]]
 arma::rowvec mtlr_grad(NumericVector params, arma::mat yval, arma::mat featureValue, double C1, arma::vec delta) {
   double N = featureValue.n_rows;
@@ -224,10 +224,10 @@ arma::rowvec mtlr_grad(NumericVector params, arma::mat yval, arma::mat featureVa
 
 
 //See mltr_objVal for argument definitions.
-//' Predict survival curves.
-//'
-//'@inheritParams mtlr_objVal
-//' @export
+// //' Predict survival curves.
+// //'
+// //'@inheritParams mtlr_objVal
+// //' @export
 // [[Rcpp::export]]
 arma::mat mtlr_predict(NumericVector params,arma::mat featureValue){
   double N = featureValue.n_rows;
