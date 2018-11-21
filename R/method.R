@@ -12,8 +12,8 @@ predict.mtlr <- function(object, newdata, type = c("response"), add_zero = T,...
   }
   if(!missing(newdata)){
     Terms <- object$Terms
-    Terms <- delete.response(Terms)
-    newframe <- model.matrix(Terms, data=newdata,
+    Terms <- stats::delete.response(Terms)
+    newframe <- stats::model.matrix(Terms, data=newdata,
                              xlev=object$xlevels)
     newframe <- newframe[,-1] #Remove intercept term.
     if(!is.null(object$scale)){

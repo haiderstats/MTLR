@@ -1,6 +1,10 @@
 #include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
 
+
+// Enable lambda expressions....
+// [[Rcpp::plugins(cpp11)]]
+
 using namespace Rcpp;
 using namespace std;
 
@@ -23,6 +27,14 @@ using namespace std;
 //Here we will assume that the data is ordered such that all censored observations come first. We could abstract (fairly easily)
 //away from this requirement but then we would be doing the same operation multiple times within the bottleneck of the code.
 
+//' Calculate objective value.
+//'
+//' @param params A vector of starting weights b1,b2,...,bm,theta11,theta12,...theta1m, ...theta p 1,...,theta p m
+//' @param yval A matrix of indicators of death
+//' @param featureValue A matrix of feature values.
+//' @param C1 The regularization term.
+//' @param delta The event status indicator (1= death, 0 = censored), sorted.
+//' @export
 // [[Rcpp::export]]
 double mtlr_objVal(NumericVector params, arma::mat yval, arma::mat featureValue, double C1,arma::vec delta) {
   //For the objective value see Equation 3 of the MTLR paper.
@@ -97,6 +109,10 @@ double mtlr_objVal(NumericVector params, arma::mat yval, arma::mat featureValue,
 //See mtlr_objVal for argument definition.
 //Here we will assume that the data is ordered such that all censored observations come first. We could abstract (fairly easily)
 //away from this requirement but then we would be doing the same operation multiple times within the bottleneck of the code.
+//' Calculate Gradient
+//'
+//' @inheritParams mtlr_objVal
+//' @export
 // [[Rcpp::export]]
 arma::rowvec mtlr_grad(NumericVector params, arma::mat yval, arma::mat featureValue, double C1, arma::vec delta) {
   double N = featureValue.n_rows;
@@ -170,9 +186,10 @@ arma::rowvec mtlr_grad(NumericVector params, arma::mat yval, arma::mat featureVa
 
     toAddBias =  BiasCens - BiasSecond;
     toAddWeight =  ThetaCens - ThetaSecond;
-    BiasGradient += toAddBias;
+    BiasGradient -= toAddBias/N;
 
-    ThetaGradient += toAddWeight;
+    //Note we use += here since we later subtract from the regularization term.
+    ThetaGradient += toAddWeight/N;
   }
 
   //Uncensored Piece
@@ -194,12 +211,11 @@ arma::rowvec mtlr_grad(NumericVector params, arma::mat yval, arma::mat featureVa
 
     toAddBias =  sum(yval.col(i) - BiasSecond.each_col(), 1);
     toAddWeight =  yval.col(i) * Xval - ThetaSecond;
-    BiasGradient += toAddBias;
-    ThetaGradient += toAddWeight;
-  }
+    BiasGradient -= toAddBias/N;
 
-  //BiasGradient.transform( [N](double val) { return (val * (double)(-1/N)); } );
-  //ThetaGradient.transform( [N](double val) { return (val * (double)(1/N)); } );
+    //Note we use += here since we later subtract from the regularization term.
+    ThetaGradient += toAddWeight/N;
+  }
 
   ThetaGradient = C1*thetas - ThetaGradient;
   arma::vec ThetaFlat = vectorise(ThetaGradient);
@@ -208,6 +224,10 @@ arma::rowvec mtlr_grad(NumericVector params, arma::mat yval, arma::mat featureVa
 
 
 //See mltr_objVal for argument definitions.
+//' Predict survival curves.
+//'
+//'@inheritParams mtlr_objVal
+//' @export
 // [[Rcpp::export]]
 arma::mat mtlr_predict(NumericVector params,arma::mat featureValue){
   double N = featureValue.n_rows;

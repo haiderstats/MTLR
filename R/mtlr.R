@@ -1,7 +1,20 @@
+#' @useDynLib MTLR
+#' @importFrom Rcpp sourceCpp
+NULL
 
-
-
-
+#' Primary MTLR function. Run the mode
+#'
+#' @param formula Surv formula for survival data.
+#' @param data Surv data.
+#' @param nintervals Number of time intervals.
+#' @param C1 The regularization parameter
+#' @param normalize Boolean specifying if normalization should occur. Strongly suggested.
+#' @param threshold The threshold for optim
+#' @param maxit The maximum interations for optim
+#' @param lower The lower L-BFGS-B optim
+#' @param upper The upper.
+#' @param train_biases Boolean specifying whether to run an interation training biases first.
+#' @export
 mtlr <- function(formula,
                  data,
                  nintervals = NULL,
@@ -15,15 +28,15 @@ mtlr <- function(formula,
   cl <- match.call() #Save a copy of the function call.
 
   #Data setup
-  mf <- model.frame(formula = formula, data)
+  mf <- stats::model.frame(formula = formula, data)
   Terms <- attr(mf, "terms")
-  xlevels <-.getXlevels(Terms, mf)
+  xlevels <- stats::.getXlevels(Terms, mf)
 
-  x <- model.matrix(Terms, data = mf)
+  x <- stats::model.matrix(Terms, data = mf)
   x <- x[,-1] #Remove intercept term -- We will handle biases later.
-  y <- model.response(mf)
+  y <- stats::model.response(mf)
 
-  if (!is.Surv(y))
+  if (!survival::is.Surv(y))
     stop("The response must be a Surv object.")
   if(attr(y, "type") != "right")
     stop("Currently only right censored data is supported.")
@@ -61,7 +74,7 @@ mtlr <- function(formula,
 
   m <- nintervals + 1   #The number of time points to evaulate will be the number of time intervals + 1.
   quantiles <- seq(0,1,length.out = m+2)[-c(1,m+2)] #We will select time point based on the distribution of the times.
-  time_points <- unname(quantile(time, quantiles))
+  time_points <- unname(stats::quantile(time, quantiles))
 
 
   time_points <- time_points[!duplicated(time_points)]#Small data (or common event times) we will have duplicated time points -- we remove them.
@@ -78,7 +91,7 @@ mtlr <- function(formula,
   if(train_biases){
     zero_matrix <- matrix(0,ncol = ncol(x), nrow = nrow(x))   #We create a zero_matrix to train the biases
 
-    bias_par <- optim(par = rep(0,length(time_points)*(ncol(x) +1)),fn = mtlr_objVal,gr = mtlr_grad, yval = y_matrix,
+    bias_par <- stats::optim(par = rep(0,length(time_points)*(ncol(x) +1)),fn = mtlr_objVal,gr = mtlr_grad, yval = y_matrix,
                      featureVal = zero_matrix, C1=C1, delta = sort(delta),
                      method = "L-BFGS-B", lower = lower, upper = upper, control = c(maxit = maxit, factr = threshold_factor))
     if(bias_par$convergence == 52)
@@ -87,12 +100,12 @@ mtlr <- function(formula,
     bias_par <- list(par = rep(0,length(time_points)*(ncol(x) +1)))
   }
 
-  params_uncensored <- optim(par = bias_par$par,fn = mtlr_objVal, gr = mtlr_grad, yval = y_matrix, featureVal = x, C1 = C1, delta = rep(1,nrow(x)),
+  params_uncensored <- stats::optim(par = bias_par$par,fn = mtlr_objVal, gr = mtlr_grad, yval = y_matrix, featureVal = x, C1 = C1, delta = rep(1,nrow(x)),
                        method = "L-BFGS-B", lower = lower, upper = upper, control = c(maxit = maxit, factr = threshold_factor))
   if(params_uncensored$convergence == 52)
     stop(paste("Error occured while training MTLR. Optim Error: ", params_uncensored$message))
 
-  final_params <- optim(par = params_uncensored$par,fn = mtlr_objVal,gr = mtlr_grad, yval = y_matrix, featureVal = x, C1 = C1,delta = sort(delta),
+  final_params <- stats::optim(par = params_uncensored$par,fn = mtlr_objVal,gr = mtlr_grad, yval = y_matrix, featureVal = x, C1 = C1,delta = sort(delta),
                     method = "L-BFGS-B", lower = lower, upper = upper, control = c(maxit = maxit, factr = threshold_factor))
   if(final_params$convergence == 52)
     stop(paste("Error occured while training MTLR. Optim Error: ", final_params$message))
