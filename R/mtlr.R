@@ -18,13 +18,13 @@ NULL
 mtlr <- function(formula,
                  data,
                  nintervals = NULL,
-                 C1 = 1,
                  normalize = T,
+                 C1 = 1,
+                 train_biases = T,
                  threshold = 1e-05,
                  maxit = 5000,
                  lower = -20,
-                 upper = 20,
-                 train_biases = T){
+                 upper = 20){
   cl <- match.call() #Save a copy of the function call.
 
   #Data setup
@@ -118,7 +118,9 @@ mtlr <- function(formula,
   fit <- list(weight_matrix = weights,
               x = x,
               y = y_matrix,
+              response = y,
               time_points = time_points,
+              C1 = C1,
               Call = cl,
               Terms = Terms,
               scale = scales,

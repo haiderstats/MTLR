@@ -75,3 +75,95 @@ predict_median <- function(survivalCurve, predictedTimes){
   return(medianProbabilityTime)
 }
 
+
+ll <- function(object, newdata){
+  #For the log-likelihood loss we need to compute losses differently for censored and uncensored patients.
+  #For censored patients the loss will correspond the the (log) survival probability assigned by the model at the time of censoring.
+  #For uncensored patients, we will consider the log of the probability assigned to the time interval when the patient died.
+  #Then we take the negative of this loss and thus would like to minimize the loss.
+  mf <- stats::model.frame(formula = formula, data)
+  Terms <- attr(mf, "terms")
+
+  x <- stats::model.matrix(Terms, data = mf)
+  x <- x[,-1]
+  survivalCurves = mtlr_predict(params,d)
+  NCens = sum(1-  dat$delta)
+
+  logloss = 0
+  #Censored patients
+  censorTimes = dat$time[1:NCens]
+  probAtCensorTime = sapply(seq_along(censorTimes),
+                            function(index) predictProbabilityFromCurve(survivalCurves[,index],
+                                                                        timePoints,
+                                                                        censorTimes[index]))
+  logloss = logloss - sum(log(probAtCensorTime + 1e-5))
+  #Uncensored patients
+  deathTimes = dat$time[(NCens+1):nrow(dat)]
+  uncenSurvival = survivalCurves[,(NCens+1):nrow(dat),drop=FALSE]
+  uncenSurvival = rbind(1,uncenSurvival,0)
+  pmfProbs = -diff(uncenSurvival)
+  indexRow = sapply(deathTimes, function(x) findInterval(x, timePoints)) + 1
+  indexCol = 1:(nrow(dat) - NCens)
+  indexMat = matrix(c(indexRow,indexCol),ncol = 2)
+  probs = pmfProbs[indexMat]
+  logloss = logloss  - sum(log(probs))
+
+  return(logloss/nrow(dat))
+}
+
+foldme <- function(time, delta, nfolds,foldtype){
+  Order= order(delta,time)
+  foldIndex = switch(foldtype,
+                     fullstrat = {
+                       Order= order(delta,time)
+                       lapply(1:nfolds, function(x) Order[seq(x,length(time), by = nfolds)])
+                     },
+                     censorstrat = {
+                       delta = delta[sample(length(delta))]
+                       Order= order(delta)
+                       lapply(1:nfolds, function(x) Order[seq(x,length(time), by = nfolds)])
+                     },
+                     random = {
+                       Order = sample(length(time))
+                       lapply(1:nfolds, function(x) Order[seq(x,length(time), by = nfolds)])
+                     }
+  )
+  return(foldIndex)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
