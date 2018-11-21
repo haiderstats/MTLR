@@ -14,7 +14,8 @@ Imports:
     Rcpp (>= 0.12.18),
     survival (>= 2.42-6),
 Suggests:
-    ggplot2 (>= 3.0.0)
+    ggplot2 (>= 3.0.0),
+    reshape2 (>= 1.4.3)
 Depends: R (>= 3.4.4)
 RoxygenNote: 6.1.1
 LinkingTo:
