@@ -1,5 +1,3 @@
-
-
 #' prints an mtlr object
 #'
 #' @param x an mtlr object
@@ -7,8 +5,10 @@
 #' @param ... for future methods.
 #' @export
 print.mtlr <- function(x, digits = max(3, getOption("digits")), ...){
-  cat("\nCall: ", deparse(x$Call), "\n\n")
-  cat("\nWeights:\n" )
+  cat("\nCall: ", deparse(x$Call), "\n")
+  cat("\nTime points:\n")
+  print(x$time_points, digits = digits)
+  cat("\n\nWeights:\n" )
   print(x$weight_matrix,digits = digits)
 }
 
@@ -111,7 +111,18 @@ plot.mtlr <- function(x, numfeatures=5, weightnames = c(), digits, ...) {
   }
 }
 
-#summary.mtlr
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
