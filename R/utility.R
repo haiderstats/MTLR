@@ -75,42 +75,6 @@ predict_median <- function(survivalCurve, predictedTimes){
   return(medianProbabilityTime)
 }
 
-
-ll <- function(object, newdata){
-  #For the log-likelihood loss we need to compute losses differently for censored and uncensored patients.
-  #For censored patients the loss will correspond the the (log) survival probability assigned by the model at the time of censoring.
-  #For uncensored patients, we will consider the log of the probability assigned to the time interval when the patient died.
-  #Then we take the negative of this loss and thus would like to minimize the loss.
-  mf <- stats::model.frame(formula = formula, data)
-  Terms <- attr(mf, "terms")
-
-  x <- stats::model.matrix(Terms, data = mf)
-  x <- x[,-1]
-  survivalCurves = mtlr_predict(params,d)
-  NCens = sum(1-  dat$delta)
-
-  logloss = 0
-  #Censored patients
-  censorTimes = dat$time[1:NCens]
-  probAtCensorTime = sapply(seq_along(censorTimes),
-                            function(index) predictProbabilityFromCurve(survivalCurves[,index],
-                                                                        timePoints,
-                                                                        censorTimes[index]))
-  logloss = logloss - sum(log(probAtCensorTime + 1e-5))
-  #Uncensored patients
-  deathTimes = dat$time[(NCens+1):nrow(dat)]
-  uncenSurvival = survivalCurves[,(NCens+1):nrow(dat),drop=FALSE]
-  uncenSurvival = rbind(1,uncenSurvival,0)
-  pmfProbs = -diff(uncenSurvival)
-  indexRow = sapply(deathTimes, function(x) findInterval(x, timePoints)) + 1
-  indexCol = 1:(nrow(dat) - NCens)
-  indexMat = matrix(c(indexRow,indexCol),ncol = 2)
-  probs = pmfProbs[indexMat]
-  logloss = logloss  - sum(log(probs))
-
-  return(logloss/nrow(dat))
-}
-
 foldme <- function(time, delta, nfolds,foldtype){
   Order= order(delta,time)
   foldIndex = switch(foldtype,
@@ -129,6 +93,59 @@ foldme <- function(time, delta, nfolds,foldtype){
                      }
   )
   return(foldIndex)
+}
+
+
+
+log_loss <- function(object, newdata){
+  #For the loss we need to compute losses differently for censored and uncensored patients.
+  #For censored patients the loss will correspond the the (log) survival probability assigned by the model at the time of censoring.
+  #For uncensored patients, we will consider the log of the probability assigned to the time interval when the patient died.
+  #Then we take the negative of this loss and thus would like to minimize the loss.
+
+  #Get the survival curves for all observations.
+  curves = predict.mtlr(object,newdata, type = "survivalcurve")
+
+
+  #We need to know which observations are censored in the new data.
+  Terms <- object$Terms
+  mf <- stats::model.frame(Terms, data=newdata,xlev=object$xlevels)
+  response <- stats::model.response(mf)
+
+  event_times <- response[,1]
+  delta <- response[,2]
+
+  censor_ind <- which(!delta)
+
+  #Initialize loss to 0.
+  logloss <- 0
+
+  #Censored patients
+  censor_prob <- sapply(censor_ind,
+                            function(index) predict_prob(curves[,index+1],
+                                                         curves[,1],
+                                                         event_times[index]
+                            ))
+  #Currently we add a value of 0.00001 to all values since otherwise we might take the log of 0.
+  #This is clearly not ideal but shouldn't make a large impact especially since this is only used for selecting C1.
+  logloss <- logloss - sum(log(censor_prob + 1e-05))
+
+  #Uncensored patients
+  uncen_ind <- which(as.logical(delta))
+  uncen_curves <- curves[,uncen_ind+1,drop=FALSE]
+  uncen_curves = rbind(uncen_curves, 0)
+  #Get the probability of the event occuring in every interval.
+  pmf_probs <- -apply(uncen_curves,2,diff)
+
+  #This will find the index of which interval the event occured we then index pmf_probs the by observation index
+  #and the event index to generate the vector of probabilities assigend to each observations respective event time.
+  event_ind <- sapply(event_times[uncen_ind], function(x) findInterval(x, curves[,1]))
+  index_col <- 1:sum(delta)
+  index_mat <- matrix(c(event_ind,index_col),ncol = 2)
+  probs <- pmf_probs[index_mat]
+  logloss <- logloss  - sum(log(probs+1e-05))
+
+  return(logloss/nrow(newdata))
 }
 
 
