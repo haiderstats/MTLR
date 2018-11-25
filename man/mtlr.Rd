@@ -4,9 +4,9 @@
 \alias{mtlr}
 \title{Primary MTLR function. Run the mode}
 \usage{
-mtlr(formula, data, nintervals = NULL, C1 = 1, normalize = T,
-  threshold = 1e-05, maxit = 5000, lower = -20, upper = 20,
-  train_biases = T)
+mtlr(formula, data, nintervals = NULL, normalize = T, C1 = 1,
+  train_biases = T, threshold = 1e-05, maxit = 5000, lower = -20,
+  upper = 20)
 }
 \arguments{
 \item{formula}{Surv formula for survival data.}
@@ -15,9 +15,11 @@ mtlr(formula, data, nintervals = NULL, C1 = 1, normalize = T,
 
 \item{nintervals}{Number of time intervals.}
 
+\item{normalize}{Boolean specifying if normalization should occur. Strongly suggested.}
+
 \item{C1}{The regularization parameter}
 
-\item{normalize}{Boolean specifying if normalization should occur. Strongly suggested.}
+\item{train_biases}{Boolean specifying whether to run an interation training biases first.}
 
 \item{threshold}{The threshold for optim}
 
@@ -26,8 +28,6 @@ mtlr(formula, data, nintervals = NULL, C1 = 1, normalize = T,
 \item{lower}{The lower L-BFGS-B optim}
 
 \item{upper}{The upper.}
-
-\item{train_biases}{Boolean specifying whether to run an interation training biases first.}
 }
 \description{
 Primary MTLR function. Run the mode

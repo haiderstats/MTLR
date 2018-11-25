@@ -7,13 +7,13 @@ NULL
 #' @param formula Surv formula for survival data.
 #' @param data Surv data.
 #' @param nintervals Number of time intervals.
-#' @param C1 The regularization parameter
 #' @param normalize Boolean specifying if normalization should occur. Strongly suggested.
+#' @param C1 The regularization parameter
+#' @param train_biases Boolean specifying whether to run an interation training biases first.
 #' @param threshold The threshold for optim
 #' @param maxit The maximum interations for optim
 #' @param lower The lower L-BFGS-B optim
 #' @param upper The upper.
-#' @param train_biases Boolean specifying whether to run an interation training biases first.
 #' @export
 mtlr <- function(formula,
                  data,
