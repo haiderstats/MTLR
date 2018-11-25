@@ -16,7 +16,7 @@ Imports:
 Suggests:
     ggplot2 (>= 3.0.0),
     reshape2 (>= 1.4.3)
-Depends: R (>= 3.4.4)
+Depends: R (>= 3.4.0)
 RoxygenNote: 6.1.1
 LinkingTo:
     Rcpp,
