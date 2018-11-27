@@ -51,7 +51,7 @@ predict_mean <- function(survival_curve, predicted_times){
   slope = (1-spline(maxTime))/(min(predicted_times) - max(predicted_times))
   zeroProbabilitiyTime = min( predicted_times[which(survival_curve ==0)], maxTime + (0-spline(maxTime))/slope)
   splineWithLinear = function(time) ifelse(time < maxTime, spline(time),1 + time*slope)
-  area = stats::integrate(splineWithLinear,0, zeroProbabilitiyTime,subdivisions = 1000,rel.tol = .0001)[[1]]
+  area = stats::integrate(splineWithLinear,min(predicted_times), zeroProbabilitiyTime,subdivisions = 1000,rel.tol = .0001)[[1]]
   return(area)
 }
 
