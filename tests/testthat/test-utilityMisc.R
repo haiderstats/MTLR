@@ -1,7 +1,5 @@
 testthat::context("Testing the extra utility methods (get_param_influence,log_loss).")
 
-
-
 # get_param_influence ------------------------------------------------------------
 #Basic test for basic function (mostly to increase code coverage).
 testthat::test_that("get_influence functionality",{
@@ -11,6 +9,8 @@ testthat::test_that("get_influence functionality",{
   weights = mod$weight_matrix
   expect_equal(unname(get_param_influence(mod)), sum(abs(weights[,2, drop=FALSE])))
 })
+
+# log_loss ------------------------------------------------------------
 
 testthat::test_that("log_loss functionality all uncensored",{
   formula <- survival::Surv(time,status)~.
@@ -30,7 +30,6 @@ testthat::test_that("log_loss functionality all uncensored",{
   expect_equal(log_loss(object,newdata),loss/nrow(newdata))
 })
 
-# log_loss ------------------------------------------------------------
 testthat::test_that("log_loss functionality all censored",{
   formula <- survival::Surv(time,status)~.
   data <- survival::leukemia
@@ -72,20 +71,3 @@ testthat::test_that("log_loss functionality mixed uncensored and censored",{
 
   expect_equal(log_loss(object,newdata),loss/nrow(newdata))
 })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
