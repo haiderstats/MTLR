@@ -30,6 +30,7 @@ testthat::test_that("log_loss functionality all uncensored",{
   expect_equal(log_loss(object,newdata),loss/nrow(newdata))
 })
 
+# log_loss ------------------------------------------------------------
 testthat::test_that("log_loss functionality all censored",{
   formula <- survival::Surv(time,status)~.
   data <- survival::leukemia
