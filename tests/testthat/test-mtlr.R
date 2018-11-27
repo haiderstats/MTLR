@@ -15,6 +15,12 @@ testthat::test_that("mtlr function is consistent for more complex survival datas
   expect_equal_to_reference(mtlr(formula,data),"mtlr_lung.rds")
 })
 
+testthat::test_that("mtlr function is consistent for more complex survival dataset - no extra bias training",{
+  formula = survival::Surv(time,status)~.
+  data = survival::lung
+  expect_equal_to_reference(mtlr(formula,data, train_biases = F),"mtlr_lung_nobias.rds")
+})
+
 testthat::test_that("mtlr function is consistent for all censored survival dataset",{
   formula = survival::Surv(time,status)~.
   data = survival::leukemia
