@@ -20,56 +20,60 @@ get_param_influence <- function(mtlr_object){
 #have the same probability (y value) then the spline is constant outside of the training data. We need this to be a decreasing function
 #outside the training data so instead we take the linear fit of (0,1) and the last time point we have (p,t*) and then apply this linear
 #function to all points outside of our fit.
-predict_prob <- function(survivalCurve,predictedTimes, timeToPredict){
-  spline = stats::splinefun(predictedTimes, survivalCurve, method = "hyman")
-  maxTime = max(predictedTimes)
-  slope = (1-spline(maxTime))/(0 - max(predictedTimes))
-  predictedProbabilities = rep(0, length(timeToPredict))
-  linearChange = which(timeToPredict > maxTime)
+predict_prob <- function(survival_curve,predicted_times, time_to_predict){
+  spline = stats::splinefun(predicted_times, survival_curve, method = "hyman")
+  maxTime = max(predicted_times)
+  slope = (1-spline(maxTime))/(min(predicted_times) - max(predicted_times))
+  predictedProbabilities = rep(0, length(time_to_predict))
+  linearChange = which(time_to_predict > maxTime)
   if(length(linearChange) > 0){
-    predictedProbabilities[linearChange] = pmax(1 + timeToPredict[linearChange]*slope,0)
-    predictedProbabilities[-linearChange] = spline(timeToPredict[-linearChange])
+    predictedProbabilities[linearChange] = pmax(1 + time_to_predict[linearChange]*slope,0)
+    #If time_to_predict is less than predicted_times then we will enforce this probability to be a max of 1.
+    #The spline fit does a linear line outside of the range of predicted_times.
+    predictedProbabilities[-linearChange] = pmin(spline(time_to_predict[-linearChange]),1)
   }
   else{
-    predictedProbabilities = spline(timeToPredict)
+    predictedProbabilities = pmin(spline(time_to_predict),1)
   }
   return(predictedProbabilities)
 }
 
 
 #We calculate the mean and median survival times assuming a monotone spline fit of the survival curve points.
-predict_mean <- function(survivalCurve, predictedTimes){
+predict_mean <- function(survival_curve, predicted_times){
   #If all the predicted probabilities are 1 the integral will be infinite. For this reason we slightly decrease the
   #last value.
-  if(all(survivalCurve==1)){
+  if(all(survival_curve==1)){
     return(Inf)
   }
-  spline = stats::splinefun(predictedTimes, survivalCurve, method = "hyman")
-  maxTime = max(predictedTimes)
-  slope = (1-spline(maxTime))/(0 - max(predictedTimes))
-  zeroProbabilitiyTime = min( predictedTimes[which(survivalCurve ==0)], maxTime + (0-spline(maxTime))/slope)
+  spline = stats::splinefun(predicted_times, survival_curve, method = "hyman")
+  maxTime = max(predicted_times)
+  slope = (1-spline(maxTime))/(min(predicted_times) - max(predicted_times))
+  zeroProbabilitiyTime = min( predicted_times[which(survival_curve ==0)], maxTime + (0-spline(maxTime))/slope)
   splineWithLinear = function(time) ifelse(time < maxTime, spline(time),1 + time*slope)
   area = stats::integrate(splineWithLinear,0, zeroProbabilitiyTime,subdivisions = 1000,rel.tol = .0001)[[1]]
   return(area)
 }
 
-predict_median <- function(survivalCurve, predictedTimes){
+
+predict_median <- function(survival_curve, predicted_times){
   #If all the predicted probabilities are 1 the integral will be infinite.
-  if(all(survivalCurve==1)){
+  if(all(survival_curve==1)){
     return(Inf)
   }
-  spline = stats::splinefun(predictedTimes, survivalCurve, method = "hyman")
-  minProb = min(spline(predictedTimes))
-  if(minProb < .5){
-    maximumSmallerThanMedian = predictedTimes[min(which(survivalCurve <.5))]
-    minimumGreaterThanMedian = predictedTimes[max(which(survivalCurve >.5))]
+  spline = stats::splinefun(predicted_times, survival_curve, method = "hyman")
+  minProb = min(spline(predicted_times))
+  maxProb = max(spline(predicted_times))
+  if(maxProb < 0.5) return(min(predicted_times))
+  if(minProb < 0.5){
+    maximumSmallerThanMedian = predicted_times[min(which(survival_curve <.5))]
+    minimumGreaterThanMedian = predicted_times[max(which(survival_curve >.5))]
     splineInv = stats::splinefun(spline(seq(minimumGreaterThanMedian, maximumSmallerThanMedian, length.out = 1000)),
                           seq(minimumGreaterThanMedian, maximumSmallerThanMedian, length.out = 1000))
     medianProbabilityTime = splineInv(0.5)
-  }
-  else{
-    maxTime = max(predictedTimes)
-    slope = (1-spline(maxTime))/(0 - max(predictedTimes))
+  } else{
+    maxTime = max(predicted_times)
+    slope = (1-spline(maxTime))/(min(predicted_times) - max(predicted_times))
     medianProbabilityTime = maxTime + (0.5-spline(maxTime))/slope
   }
   return(medianProbabilityTime)
