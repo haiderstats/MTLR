@@ -15,7 +15,8 @@ Imports:
     survival (>= 2.42)
 Suggests:
     ggplot2 (>= 3.0.0),
-    reshape2 (>= 1.4.3)
+    reshape2 (>= 1.4.3),
+    testthat
 Depends: R (>= 3.4.0)
 RoxygenNote: 6.1.1
 LinkingTo:
