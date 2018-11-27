@@ -33,7 +33,7 @@ mtlr <- function(formula,
   xlevels <- stats::.getXlevels(Terms, mf)
 
   x <- stats::model.matrix(Terms, data = mf)
-  x <- x[,-1] #Remove intercept term -- We will handle biases later.
+  x <- x[,-1,drop=FALSE] #Remove intercept term -- We will handle biases later.
   y <- stats::model.response(mf)
 
   if (!survival::is.Surv(y))
@@ -70,7 +70,9 @@ mtlr <- function(formula,
   #Here we order our data by the censor status.
   ord = order(delta)
 
-  x <- x[ord,]
+  if(ncol(x)){
+    x <- x[ord,1:ncol(x),drop=FALSE]
+  }
 
   m <- nintervals + 1   #The number of time points to evaulate will be the number of time intervals + 1.
   quantiles <- seq(0,1,length.out = m+2)[-c(1,m+2)] #We will select time point based on the distribution of the times.
@@ -81,7 +83,7 @@ mtlr <- function(formula,
 
   #We make a matrix where each column is a vector of indicators if an observation is dead at each time point, e.g. (0,0,,...,0,1,1,...1).
   #(See 'Learning Patient-Specific Cancer Survival Distributions as a Sequence of Dependent Regressors' Page 3.)
-  y_matrix = matrix(1 - Reduce(c,Map(function(ind) time[ord] > time_points[ind], seq_along(time_points))), ncol = nrow(x), byrow = T)
+  y_matrix = matrix(1 - Reduce(c,Map(function(ind) time[ord] > time_points[ind], seq_along(time_points))), ncol = length(time), byrow = T)
 
   #We first train the biases (by setting feature parameters to zero (dAsZero)). Then we train the feature values as if all patients
   #were uncensored (this creates "good" starting values since with censored patients the objective is non-convex). Then we finally
