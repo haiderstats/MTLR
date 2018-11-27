@@ -5,7 +5,7 @@
 #This essentially measure how much "influence" each feature had on the survival of each observation.
 get_param_influence <- function(mtlr_object){
   weights= mtlr_object$weight_matrix
-  weights = weights[,-1] #Remove bias
+  weights = weights[,-1, drop= FALSE] #Remove bias
   influence = apply(weights,2,function(x) sum(abs(x)))
   return(influence)
 }
@@ -121,35 +121,38 @@ log_loss <- function(object, newdata){
   delta <- response[,2]
 
   censor_ind <- which(!delta)
+  uncen_ind <- which(!!delta)
 
   #Initialize loss to 0.
   logloss <- 0
 
   #Censored patients
-  censor_prob <- sapply(censor_ind,
-                            function(index) predict_prob(curves[,index+1],
-                                                         curves[,1],
-                                                         event_times[index]
-                            ))
-  #Currently we add a value of 0.00001 to all values since otherwise we might take the log of 0.
-  #This is clearly not ideal but shouldn't make a large impact especially since this is only used for selecting C1.
-  logloss <- logloss - sum(log(censor_prob + 1e-05))
+  if(length(censor_ind)){
+    censor_prob <- sapply(censor_ind,
+                          function(index) predict_prob(curves[,index+1],
+                                                       curves[,1],
+                                                       event_times[index]
+                          ))
+    #Currently we add a value of 0.00001 to all values since otherwise we might take the log of 0.
+    #This is clearly not ideal but shouldn't make a large impact especially since this is only used for selecting C1.
+    logloss <- logloss - sum(log(censor_prob + 1e-05))
+  }
 
   #Uncensored patients
-  uncen_ind <- which(as.logical(delta))
-  uncen_curves <- curves[,uncen_ind+1,drop=FALSE]
-  uncen_curves = rbind(uncen_curves, 0)
-  #Get the probability of the event occuring in every interval.
-  pmf_probs <- -apply(uncen_curves,2,diff)
+  if(length(uncen_ind)){
+    uncen_curves <- curves[,uncen_ind+1,drop=FALSE]
+    uncen_curves = rbind(uncen_curves, 0)
+    #Get the probability of the event occuring in every interval.
+    pmf_probs <- -apply(uncen_curves,2,diff)
 
-  #This will find the index of which interval the event occured we then index pmf_probs the by observation index
-  #and the event index to generate the vector of probabilities assigend to each observations respective event time.
-  event_ind <- sapply(event_times[uncen_ind], function(x) findInterval(x, curves[,1]))
-  index_col <- 1:sum(delta)
-  index_mat <- matrix(c(event_ind,index_col),ncol = 2)
-  probs <- pmf_probs[index_mat]
-  logloss <- logloss  - sum(log(probs+1e-05))
-
+    #This will find the index of which interval the event occured we then index pmf_probs the by observation index
+    #and the event index to generate the vector of probabilities assigend to each observations respective event time.
+    event_ind <- sapply(event_times[uncen_ind], function(x) findInterval(x, curves[,1]))
+    index_col <- 1:sum(delta)
+    index_mat <- matrix(c(event_ind,index_col),ncol = 2)
+    probs <- pmf_probs[index_mat]
+    logloss <- logloss  - sum(log(probs+1e-05))
+  }
   return(logloss/nrow(newdata))
 }
 
