@@ -46,8 +46,6 @@ mtlr <- function(formula,
 
   if(any(time < 0))
     stop("All event times must be positive.")
-  if(max(delta) == 0)
-    stop("All events are censored.")
   if(C1 < 0)
     stop("C1 must be non-negative.")
   if(threshold <= 0)
@@ -115,8 +113,8 @@ mtlr <- function(formula,
   weights <- matrix(final_params$par, ncol = ncol(x) + 1,byrow=FALSE)
   colnames(weights) <- c("Bias",colnames(x))
   rownames(weights) <- round(time_points,2)
-  x = x[order(ord),]
-  y_matrix = y_matrix[,order(ord)]
+  x <- x[order(ord),0:ncol(x),drop = FALSE]
+  y_matrix <- y_matrix[,order(ord)]
   fit <- list(weight_matrix = weights,
               x = x,
               y = y_matrix,
