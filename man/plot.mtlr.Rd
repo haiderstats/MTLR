@@ -13,7 +13,7 @@
 \item{numfeatures}{the number of weight to plot. Default is 5. The most influential features are chosen first.}
 
 \item{featurenames}{the names of the specific weight to plot. These should correspond to the names
-in x$weight_matrix. If weightnames are supplied, then numfeatures is ignored.}
+in x$weight_matrix. If featurenames are supplied, then numfeatures is ignored.}
 
 \item{digits}{the number of digits to round to for the value of the time points.}
 
