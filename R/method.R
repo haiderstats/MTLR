@@ -43,7 +43,7 @@ print.mtlr <- function(x, digits = max(options()$digits - 4,3), ...){
 #' @seealso \code{\link[MTLR]{mtlr}} \code{\link[MTLR]{plotcurves}}
 #' @examples
 #' library(survival)
-#' mod = mtlr(Surv(time,status)~., data = lung)
+#' mod <- mtlr(Surv(time,status)~., data = lung)
 #' predict(mod, type = "survivalcurve")
 #' predict(mod, type = "prob_event")
 #' predict(mod, type = "median_time")
@@ -53,9 +53,9 @@ print.mtlr <- function(x, digits = max(options()$digits - 4,3), ...){
 #' predict(mod, type = "mean_time", add_zero = FALSE)
 #' @export
 predict.mtlr <- function(object, newdata, type = c("survivalcurve","prob_event","mean_time","median_time"), add_zero = T,...){
-  type = match.arg(type)
+  type <- match.arg(type)
   if(missing(newdata)){
-    newframe = object$x
+    newframe <- object$x
   }else{
     Terms <- object$Terms
     Terms <- stats::delete.response(Terms)
@@ -79,21 +79,21 @@ predict.mtlr <- function(object, newdata, type = c("survivalcurve","prob_event",
   surv_curves <- cbind.data.frame(time = time_points,surv_probs)
   switch(type,
          survivalcurve = surv_curves,
-         prob_event = {
+         prob_event <- {
            if(!missing(newdata)){
              mf <- stats::model.frame(object$Terms, newdata)
              y <- stats::model.response(mf)
            }else{
-             y = object$response
+             y <- object$response
            }
 
            event_times <- y[,1]
            sapply(1:(ncol(surv_curves)-1), function(i) predict_prob(surv_curves[,i+1], time_points,event_times[i]))
          },
-         mean_time = {
+         mean_time <- {
            sapply(1:(ncol(surv_curves)-1),function(i) predict_mean(surv_curves[,i+1], time_points))
          },
-         median_time = {
+         median_time <- {
            sapply(1:(ncol(surv_curves)-1),function(i) predict_median(surv_curves[,i+1], time_points))
          }
   )
@@ -114,7 +114,7 @@ predict.mtlr <- function(object, newdata, type = c("survivalcurve","prob_event",
 #'@examples
 #'#These examples are geared towards users who have installed ggplot2 and reshape2.
 #'library(survival)
-#'mod = mtlr(Surv(time,status)~., data = lung)
+#'mod <- mtlr(Surv(time,status)~., data = lung)
 #'#Basic plot with 5 most influential features
 #'plot(mod)
 #'#Plot all 8 features
@@ -130,18 +130,18 @@ plot.mtlr <- function(x, numfeatures=5, featurenames = c(), digits, ...) {
       influence <- get_param_influence(x)
       if(numfeatures > length(influence)){
         warning("Number of features specified greater than the total number of features. This has been replaced with the total number of features.")
-        numfeatures = length(influence)
+        numfeatures <- length(influence)
       }
       top_weights <- influence[order(influence, decreasing = T)[1:numfeatures]]
       top_weight_names <- names(top_weights)
       weight_index <- match(top_weight_names, colnames(weights))
     }else{
-      weight_index = match(featurenames, colnames(weights))
+      weight_index <- match(featurenames, colnames(weights))
     }
     plot_weights <- weights[,weight_index, drop = FALSE]
     chr_time <- as.character(round(time_points,digits))
     plot_data <- cbind.data.frame(time = chr_time, plot_weights)
-    plot_data = reshape2::melt(plot_data,id.vars = "time")
+    plot_data <- reshape2::melt(plot_data,id.vars = "time")
     ggplot2::ggplot(plot_data, ggplot2::aes(x = plot_data$time,
                                             y = plot_data$value,
                                             group = plot_data$variable,

@@ -16,8 +16,8 @@
 #' @examples
 #' #Set up the example:
 #' library(survival)
-#' mod = mtlr(Surv(time,status)~., data = lung)
-#' curves = predict(mod, type = "survivalcurve")
+#' mod <- mtlr(Surv(time,status)~., data = lung)
+#' curves <- predict(mod, type = "survivalcurve")
 #'
 #' plotcurves(curves, 1:10)
 #' plotcurves(curves, 1:3, color = c("red","blue","purple"))
@@ -48,21 +48,21 @@ plotcurves <- function(curves, index = 1, color = c(), xlim = c(), remove_legend
   plot_times <- seq(min(time),max(time), length.out = length(time)*100)
   plot_probs <- as.data.frame(sapply(curves,
                                    function(curve){
-                                     curve = ifelse(curve < 1e-20,0,curve)
-                                     survivialSpline = stats::splinefun(time, curve, method = "hyman")
+                                     curve <- ifelse(curve < 1e-20,0,curve)
+                                     survivialSpline <- stats::splinefun(time, curve, method = "hyman")
                                      return(pmax(survivialSpline(plot_times),0))
                                    }
   ))
-  plot_data = cbind.data.frame(plot_times,plot_probs)
-  plot_data = reshape2::melt(plot_data,measure.vars = names(plot_data)[-1], variable.name = "Index")
-  pl = ggplot2::ggplot(data = plot_data, ggplot2::aes(x = plot_times,y = plot_data$value, colour = plot_data$Index))+
+  plot_data <- cbind.data.frame(plot_times,plot_probs)
+  plot_data <- reshape2::melt(plot_data,measure.vars = names(plot_data)[-1], variable.name = "Index")
+  pl <- ggplot2::ggplot(data = plot_data, ggplot2::aes(x = plot_times,y = plot_data$value, colour = plot_data$Index))+
     ggplot2::geom_line(size = 1.5)
   if(colorOK)
-    pl = pl + ggplot2::scale_color_manual(values = color)
+    pl <- pl + ggplot2::scale_color_manual(values = color)
   if(length(xlim)==2){
-    pl = pl+ ggplot2::xlim(c(xlim[1],xlim[2]))
+    pl <- pl+ ggplot2::xlim(c(xlim[1],xlim[2]))
   }
-  pl = pl +
+  pl <- pl +
     ggplot2::scale_y_continuous( limits= c(0,1),breaks = c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1))+
     ggplot2::theme_bw() +
     ggplot2::theme(
@@ -73,7 +73,7 @@ plotcurves <- function(curves, index = 1, color = c(), xlim = c(), remove_legend
     ggplot2::labs(y = "Survival Probability",x = "Time", color = "Index" )
   #If we have too many survival curves then the legend takes up the whole plot. We have an if to catch this and remove the legend.
   if(length(index) > 15 & remove_legend){
-    pl = pl + ggplot2::theme(legend.position = "None")
+    pl <- pl + ggplot2::theme(legend.position = "None")
   }
   return(pl)
 }

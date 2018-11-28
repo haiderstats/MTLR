@@ -26,7 +26,7 @@
 #'   }
 #' @examples
 #' library(survival)
-#' cv_mod = mtlr_cv(Surv(time,status)~., data = lung)
+#' cv_mod <- mtlr_cv(Surv(time,status)~., data = lung)
 #' #Note the best C1 also corresponds to the lost average loss:
 #' cv_mod
 #' @seealso \code{\link[MTLR]{mtlr}}
@@ -47,7 +47,7 @@ mtlr_cv <- function(formula,
   if(any(C1_vec < 0)){
     stop("All values of C1 must be non-negative.")
   }
-  foldtype = match.arg(foldtype)
+  foldtype <- match.arg(foldtype)
 
 
   mf <- stats::model.frame(formula = formula, data)
@@ -68,11 +68,11 @@ mtlr_cv <- function(formula,
     res_mat[fold,] <- result
   }
   avg_results <- apply(res_mat, 2, mean)
-  names(avg_results) = C1_vec
+  names(avg_results) <- C1_vec
   best_C1 <- C1_vec[which.min(avg_results)]
 
 
-  to_return = list(bestC1 = best_C1, avg_loss = avg_results)
+  to_return <- list(bestC1 = best_C1, avg_loss = avg_results)
   return(to_return)
 }
 

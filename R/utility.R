@@ -4,9 +4,9 @@
 #Helper function for plot.mtlr -- Here we get the sum of the absolute values of the feature weights across time.
 #This essentially measure how much "influence" each feature had on the survival of each observation.
 get_param_influence <- function(mtlr_object){
-  weights= mtlr_object$weight_matrix
-  weights = weights[,-1, drop= FALSE] #Remove bias
-  influence = apply(weights,2,function(x) sum(abs(x)))
+  weights<- mtlr_object$weight_matrix
+  weights <- weights[,-1, drop= FALSE] #Remove bias
+  influence <- apply(weights,2,function(x) sum(abs(x)))
   return(influence)
 }
 
@@ -21,19 +21,19 @@ get_param_influence <- function(mtlr_object){
 #outside the training data so instead we take the linear fit of (0,1) and the last time point we have (p,t*) and then apply this linear
 #function to all points outside of our fit.
 predict_prob <- function(survival_curve,predicted_times, time_to_predict){
-  spline = stats::splinefun(predicted_times, survival_curve, method = "hyman")
-  maxTime = max(predicted_times)
-  slope = (1-spline(maxTime))/(min(predicted_times) - max(predicted_times))
-  predictedProbabilities = rep(0, length(time_to_predict))
-  linearChange = which(time_to_predict > maxTime)
+  spline <- stats::splinefun(predicted_times, survival_curve, method = "hyman")
+  maxTime <- max(predicted_times)
+  slope <- (1-spline(maxTime))/(min(predicted_times) - max(predicted_times))
+  predictedProbabilities <- rep(0, length(time_to_predict))
+  linearChange <- which(time_to_predict > maxTime)
   if(length(linearChange) > 0){
-    predictedProbabilities[linearChange] = pmax(1 + time_to_predict[linearChange]*slope,0)
+    predictedProbabilities[linearChange] <- pmax(1 + time_to_predict[linearChange]*slope,0)
     #If time_to_predict is less than predicted_times then we will enforce this probability to be a max of 1.
     #The spline fit does a linear line outside of the range of predicted_times.
-    predictedProbabilities[-linearChange] = pmin(spline(time_to_predict[-linearChange]),1)
+    predictedProbabilities[-linearChange] <- pmin(spline(time_to_predict[-linearChange]),1)
   }
   else{
-    predictedProbabilities = pmin(spline(time_to_predict),1)
+    predictedProbabilities <- pmin(spline(time_to_predict),1)
   }
   return(predictedProbabilities)
 }
@@ -46,12 +46,12 @@ predict_mean <- function(survival_curve, predicted_times){
   if(all(survival_curve==1)){
     return(Inf)
   }
-  spline = stats::splinefun(predicted_times, survival_curve, method = "hyman")
-  maxTime = max(predicted_times)
-  slope = (1-spline(maxTime))/(min(predicted_times) - max(predicted_times))
-  zeroProbabilitiyTime = min( predicted_times[which(survival_curve ==0)], maxTime + (0-spline(maxTime))/slope)
-  splineWithLinear = function(time) ifelse(time < maxTime, spline(time),1 + time*slope)
-  area = stats::integrate(splineWithLinear,min(predicted_times), zeroProbabilitiyTime,subdivisions = 1000,rel.tol = .0001)[[1]]
+  spline <- stats::splinefun(predicted_times, survival_curve, method = "hyman")
+  maxTime <- max(predicted_times)
+  slope <- (1-spline(maxTime))/(min(predicted_times) - max(predicted_times))
+  zeroProbabilitiyTime <- min( predicted_times[which(survival_curve ==0)], maxTime + (0-spline(maxTime))/slope)
+  splineWithLinear <- function(time) ifelse(time < maxTime, spline(time),1 + time*slope)
+  area <- stats::integrate(splineWithLinear,min(predicted_times), zeroProbabilitiyTime,subdivisions = 1000,rel.tol = .0001)[[1]]
   return(area)
 }
 
@@ -61,20 +61,20 @@ predict_median <- function(survival_curve, predicted_times){
   if(all(survival_curve==1)){
     return(Inf)
   }
-  spline = stats::splinefun(predicted_times, survival_curve, method = "hyman")
-  minProb = min(spline(predicted_times))
-  maxProb = max(spline(predicted_times))
+  spline <- stats::splinefun(predicted_times, survival_curve, method = "hyman")
+  minProb <- min(spline(predicted_times))
+  maxProb <- max(spline(predicted_times))
   if(maxProb < 0.5) return(min(predicted_times))
   if(minProb < 0.5){
-    maximumSmallerThanMedian = predicted_times[min(which(survival_curve <.5))]
-    minimumGreaterThanMedian = predicted_times[max(which(survival_curve >.5))]
-    splineInv = stats::splinefun(spline(seq(minimumGreaterThanMedian, maximumSmallerThanMedian, length.out = 1000)),
+    maximumSmallerThanMedian <- predicted_times[min(which(survival_curve <.5))]
+    minimumGreaterThanMedian <- predicted_times[max(which(survival_curve >.5))]
+    splineInv <- stats::splinefun(spline(seq(minimumGreaterThanMedian, maximumSmallerThanMedian, length.out = 1000)),
                           seq(minimumGreaterThanMedian, maximumSmallerThanMedian, length.out = 1000))
-    medianProbabilityTime = splineInv(0.5)
+    medianProbabilityTime <- splineInv(0.5)
   } else{
-    maxTime = max(predicted_times)
-    slope = (1-spline(maxTime))/(min(predicted_times) - max(predicted_times))
-    medianProbabilityTime = maxTime + (0.5-spline(maxTime))/slope
+    maxTime <- max(predicted_times)
+    slope <- (1-spline(maxTime))/(min(predicted_times) - max(predicted_times))
+    medianProbabilityTime <- maxTime + (0.5-spline(maxTime))/slope
   }
   return(medianProbabilityTime)
 }
@@ -82,20 +82,20 @@ predict_median <- function(survival_curve, predicted_times){
 foldme <- function(time, delta, nfolds,foldtype = c("fullstrat","censorstrat","random")){
   if(nfolds < 1)
     stop("Number of folds must be greater than 0.")
-  type = match.arg(foldtype)
-  foldIndex = switch(type,
-                     fullstrat = {
-                       Order= order(delta,time)
+  type <- match.arg(foldtype)
+  foldIndex <- switch(type,
+                     fullstrat <- {
+                       Order<- order(delta,time)
                        lapply(1:nfolds, function(x) Order[seq(x,length(time), by = nfolds)])
                      },
-                     censorstrat = {
-                       censored = sample(which(!delta))
-                       uncensored = sample(which(!!delta))
-                       Order= c(censored,uncensored)
+                     censorstrat <- {
+                       censored <- sample(which(!delta))
+                       uncensored <- sample(which(!!delta))
+                       Order<- c(censored,uncensored)
                        lapply(1:nfolds, function(x) Order[seq(x,length(time), by = nfolds)])
                      },
-                     random = {
-                       Order = sample(length(time))
+                     random <- {
+                       Order <- sample(length(time))
                        lapply(1:nfolds, function(x) Order[seq(x,length(time), by = nfolds)])
                      }
   )
@@ -109,7 +109,7 @@ loglik_loss <- function(object, newdata){
   #Then we take the negative of this loss and thus would like to minimize the loss.
 
   #Get the survival curves for all observations.
-  curves = predict.mtlr(object,newdata, type = "survivalcurve")
+  curves <- predict.mtlr(object,newdata, type = "survivalcurve")
 
 
   #We need to know which observations are censored in the new data.
@@ -141,7 +141,7 @@ loglik_loss <- function(object, newdata){
   #Uncensored patients
   if(length(uncen_ind)){
     uncen_curves <- curves[,uncen_ind+1,drop=FALSE]
-    uncen_curves = rbind(uncen_curves, 0)
+    uncen_curves <- rbind(uncen_curves, 0)
     #Get the probability of the event occuring in every interval.
     pmf_probs <- -apply(uncen_curves,2,diff)
 

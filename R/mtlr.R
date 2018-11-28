@@ -56,10 +56,10 @@ NULL
 #' @examples
 #' #Access the Surv function and the leukemia/lung dataset.
 #' library(survival)
-#' simple_mod = mtlr(Surv(time,status)~., data = leukemia)
+#' simple_mod <- mtlr(Surv(time,status)~., data = leukemia)
 #' simple_mod
 #'
-#' bigger_mod = mtlr(Surv(time,status)~., data = lung)
+#' bigger_mod <- mtlr(Surv(time,status)~., data = lung)
 #' bigger_mod
 #'
 #' #Note that observations with missing data were removed:
@@ -112,9 +112,9 @@ mtlr <- function(formula,
     x <- scale(x)
     scale_centers <- attr(x, "scaled:center")
     scale_scale <- attr(x,"scaled:scale")
-    scales = list(center= scale_centers, sd = scale_scale)
+    scales <- list(center= scale_centers, sd = scale_scale)
   }else{
-    scales = NULL
+    scales <- NULL
   }
 
   ##############################################################
@@ -122,7 +122,7 @@ mtlr <- function(formula,
   #The Rcpp functions are built to work on data that comes in with observations ordered by their event status
   #(censored observations first).
   #Here we order our data by the censor status.
-  ord = order(delta)
+  ord <- order(delta)
 
   if(ncol(x)){
     x <- x[ord,1:ncol(x),drop=FALSE]
@@ -137,12 +137,12 @@ mtlr <- function(formula,
 
   #We make a matrix where each column is a vector of indicators if an observation is dead at each time point, e.g. (0,0,,...,0,1,1,...1).
   #(See 'Learning Patient-Specific Cancer Survival Distributions as a Sequence of Dependent Regressors' Page 3.)
-  y_matrix = matrix(1 - Reduce(c,Map(function(ind) time[ord] > time_points[ind], seq_along(time_points))), ncol = length(time), byrow = T)
+  y_matrix <- matrix(1 - Reduce(c,Map(function(ind) time[ord] > time_points[ind], seq_along(time_points))), ncol = length(time), byrow = T)
 
   #We first train the biases (by setting feature parameters to zero (dAsZero)). Then we train the feature values as if all patients
   #were uncensored (this creates "good" starting values since with censored patients the objective is non-convex). Then we finally
   #train the data with their true censor statuses.
-  threshold_factor = threshold/.Machine$double.eps
+  threshold_factor <- threshold/.Machine$double.eps
 
   if(train_biases){
     zero_matrix <- matrix(0,ncol = ncol(x), nrow = nrow(x))   #We create a zero_matrix to train the biases
