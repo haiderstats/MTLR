@@ -10,9 +10,9 @@ testthat::test_that("get_influence functionality",{
   expect_equal(unname(get_param_influence(mod)), sum(abs(weights[,2, drop=FALSE])))
 })
 
-# log_loss ------------------------------------------------------------
+# loglik_loss ------------------------------------------------------------
 
-testthat::test_that("log_loss functionality all uncensored",{
+testthat::test_that("loglik_loss functionality all uncensored",{
   formula <- survival::Surv(time,status)~.
   data <- survival::leukemia
   object <- mtlr(formula,data)
@@ -27,7 +27,7 @@ testthat::test_that("log_loss functionality all uncensored",{
   curve_diff = -diff(c(curve,0))
   ind = findInterval(newdata$time, time)
   loss = -sum(log(curve_diff[ind]+1e-05))
-  expect_equal(log_loss(object,newdata),loss/nrow(newdata))
+  expect_equal(loglik_loss(object,newdata),loss/nrow(newdata))
 })
 
 testthat::test_that("log_loss functionality all censored",{
@@ -45,7 +45,7 @@ testthat::test_that("log_loss functionality all censored",{
   probs = predict_prob(curve,time,newdata$time)
 
   loss = -sum(log(probs+1e-05))
-  expect_equal(log_loss(object,newdata),loss/nrow(newdata))
+  expect_equal(loglik_loss(object,newdata),loss/nrow(newdata))
 })
 
 testthat::test_that("log_loss functionality mixed uncensored and censored",{
@@ -69,5 +69,5 @@ testthat::test_that("log_loss functionality mixed uncensored and censored",{
   probs = predict_prob(curve,time,newdata$time[5:8])
   loss = loss -sum(log(probs+1e-05))
 
-  expect_equal(log_loss(object,newdata),loss/nrow(newdata))
+  expect_equal(loglik_loss(object,newdata),loss/nrow(newdata))
 })
