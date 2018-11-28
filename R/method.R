@@ -1,10 +1,15 @@
-#' prints an mtlr object
+#' Printing an MTLR object.
 #'
-#' @param x an mtlr object
-#' @param digits The number of digits to print mtlr weights
+#' Print an object created by \code{\link[MTLR]{mtlr}}.
+#' @param x an object of class mtlr (result from calling \code{\link[MTLR]{mtlr}}).
+#' @param digits The number of digits to print mtlr weights.
 #' @param ... for future methods.
+#' @return Call, the original call to the mtlr function. Time points, the time points selected by the mtlr model. Weights, the weights of
+#' each feature across time -- rows represent each time point and each column corresponds to a feature.
+#' @seealso \code{\link[MTLR]{mtlr}}
+
 #' @export
-print.mtlr <- function(x, digits = max(3, getOption("digits")), ...){
+print.mtlr <- function(x, digits = max(options()$digits - 4,3), ...){
   cat("\nCall: ", deparse(x$Call), "\n")
   cat("\nTime points:\n")
   print(x$time_points, digits = digits)

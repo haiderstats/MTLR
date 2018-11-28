@@ -2,17 +2,24 @@
 % Please edit documentation in R/method.R
 \name{print.mtlr}
 \alias{print.mtlr}
-\title{prints an mtlr object}
+\title{Printing an MTLR object.}
 \usage{
-\method{print}{mtlr}(x, digits = max(3, getOption("digits")), ...)
+\method{print}{mtlr}(x, digits = max(options()$digits - 4, 3), ...)
 }
 \arguments{
-\item{x}{an mtlr object}
+\item{x}{an object of class mtlr (result from calling \code{\link[MTLR]{mtlr}}).}
 
-\item{digits}{The number of digits to print mtlr weights}
+\item{digits}{The number of digits to print mtlr weights.}
 
 \item{...}{for future methods.}
 }
+\value{
+Call, the original call to the mtlr function. Time points, the time points selected by the mtlr model. Weights, the weights of
+each feature across time -- rows represent each time point and each column corresponds to a feature.
+}
 \description{
-prints an mtlr object
+Print an object created by \code{\link[MTLR]{mtlr}}.
+}
+\seealso{
+\code{\link[MTLR]{mtlr}}
 }
