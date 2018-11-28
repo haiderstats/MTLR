@@ -2,41 +2,64 @@
 % Please edit documentation in R/mtlr_cv.R
 \name{mtlr_cv}
 \alias{mtlr_cv}
-\title{Primary MTLR function. Run the mode}
+\title{MTLR Internal Cross-Validation for Selecting C1.}
 \usage{
 mtlr_cv(formula, data, nintervals = NULL, normalize = T,
-  C1 = c(0.001, 0.01, 0.1, 1, 10, 100, 1000), train_biases = T,
+  C1_vec = c(0.001, 0.01, 0.1, 1, 10, 100, 1000), train_biases = T,
   loss = c("ll"), nfolds = 5, foldtype = c("fullstrat",
   "censorstrat", "random"), threshold = 1e-05, maxit = 5000,
   lower = -20, upper = 20)
 }
 \arguments{
-\item{formula}{Surv formula for survival data.}
+\item{formula}{a formula object with the response to the left of the "~" operator. The response must be a survival object returned
+by the \code{\link[survival]{Surv}} function.}
 
-\item{data}{Surv data.}
+\item{data}{a data.frame containing the features for survival prediction. These must be variables corresponding to the formula object.}
 
-\item{nintervals}{Number of time intervals.}
+\item{nintervals}{Number of time intervals to use for MTLR. Note the number of time points will be nintervals + 1. If left as NULL
+a default of sqrt(N) is used where N is the number of observations in the supplied dataset.}
 
-\item{normalize}{Boolean specifying if normalization should occur. Strongly suggested.}
+\item{normalize}{if TRUE, variables will be normalized (mean 0, standard deviation of 1). This is STRONGLY suggested. If normalization
+does not occur it is much more likely that MTLR will fail to converge. Additionally, if FALSE consider adjusting "lower" and "upper"
+used for L-BFGS-B optimization.}
 
-\item{C1}{a vector of regularization parameters to test. All values must be non-negative.}
+\item{C1_vec}{a vector of regularization parameters to test. All values must be non-negative.}
 
-\item{train_biases}{Boolean specifying whether to run an interation training biases first.}
+\item{train_biases}{if TRUE, biases will be trained before feature weights (and again trained while training feature weights). This
+has shown to speed up total training time.}
 
-\item{loss}{a string indicating the loss to optimize for which to choose the regularization parameter. Currently on the log-likelihood (ll) is supported.}
+\item{loss}{a string indicating the loss to optimize for which to choose the regularization parameter. Currently on the log-loss (ll) is supported.}
 
-\item{nfolds}{the number of internal cross validation folds}
+\item{nfolds}{the number of internal cross validation folds, default is 5.}
 
-\item{foldtype}{type of cross validation folds}
+\item{foldtype}{type of cross validation folds. Full stratification, "fullstrat", sorts observations by their event time and their event indicators
+and numbers them off into folds. This effectively give each fold approximately the same number of uncensored observations as well as keeps the range
+of time points as equivalent as possible across folds. This type of cross-validation is completely determininstic.
+Censored stratification, "censorstrat", will put approximately the same number of uncensored observations in each fold but not pay any attention to
+event time. This is partially stochastic. The totally random cross-validation, "random", randomly assigns observations to folds without considering
+event time nor event status.}
 
-\item{threshold}{The threshold for optim}
+\item{threshold}{The threshold for training the weights. This threshold will be passed to \link[stats]{optim}.}
 
-\item{maxit}{The maximum interations for optim}
+\item{maxit}{The maximum interations to run for MTLR. This parameter will be passed to \link[stats]{optim}.}
 
-\item{lower}{The lower L-BFGS-B optim}
+\item{lower}{The lower bound for L-BFGS-B optimization. This parameter will be passed to \link[stats]{optim}.}
 
-\item{upper}{The upper.}
+\item{upper}{The upper bound for L-BFGS-B optimization. This parameter will be passed to \link[stats]{optim}.}
+}
+\value{
+Performing mtlr_cv will return the following:
+\itemize{
+  \item best_C1: The value of C1 which achieved the best (lowest) loss.
+  \item avg_loss: The averaged value of loss across the five folds for each value of C1 tested.
+  }
 }
 \description{
-Primary MTLR function. Run the mode
+MTLR Internal Cross-Validation for Selecting C1.
+}
+\details{
+Explain the log-loss.
+}
+\seealso{
+\code{\link[MTLR]{mtlr}}
 }

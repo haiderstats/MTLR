@@ -33,8 +33,8 @@ testthat::test_that("mtlr_cv function is consistent for all uncensored survival 
   formula = survival::Surv(time,status)~.
   data = survival::leukemia
   data = data[data$status == 1,]
-  C1 = c(-1,1)
-  expect_error(mtlr_cv(formula,data,C1 = C1),"All values of C1 must be non-negative.")
+  C1_vec = c(-1,1)
+  expect_error(mtlr_cv(formula,data,C1_vec = C1_vec),"All values of C1 must be non-negative.")
 })
 
 
