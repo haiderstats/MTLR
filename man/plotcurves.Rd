@@ -2,19 +2,42 @@
 % Please edit documentation in R/plotcurves.R
 \name{plotcurves}
 \alias{plotcurves}
-\title{Plot the survival curves returned from MTLR with a spline fit. If over 15 survival curves are plotted the legend is removed.}
+\title{Graphically Visualize MTLR Survival Curves}
 \usage{
-plotcurves(curves, index = 1, color = c(), xlim = c())
+plotcurves(curves, index = 1, color = c(), xlim = c(),
+  remove_legend = TRUE)
 }
 \arguments{
-\item{curves}{survival curves formatted the same as those from predict.mtlr. The time points must be in the first column.}
+\item{curves}{survival curves formatted the same as those from predict.mtlr. Time points must be in the first column of the matrix followed by
+columns representing survival probabilities for each observation.}
 
-\item{index}{the index of the observation to plot. Here "1" will refer to the second column of curves}
+\item{index}{the index of the observation to plot. Here an index of 1 will refer to the second column of the curves object. If over 15 indicies are
+given the legend will be removed as to not take up plotting space. To avoid this behavior set remove_legend = FALSE.}
 
 \item{color}{the color of the plotted survival curve. The length of color must match the length of index.}
 
 \item{xlim}{the limits of the x-axis (must be a 2 length vector).}
+
+\item{remove_legend}{if TRUE the legend will be removed if over 15 indicies are supplied. If FALSE the legend will remain, however be aware that the
+legend may take up lots of space.}
 }
 \description{
-Plot the survival curves returned from MTLR with a spline fit. If over 15 survival curves are plotted the legend is removed.
+Plot the survival curves returned from predict.mtlr. Users must have packages ggplot2 and reshape2 installed in order to use this function.
+Survival curves for MTLR are smoothed using a monotonic cubic spline using a Hyman filtering between timepoints. For details regarding this
+smoothing function see \code{\link[stats]{splinefun}}.
+}
+\examples{
+library(survival)
+mod = mtlr(Surv(time,status)~., data = lung)
+curves = predict(mod, type = "survivalcurve")
+plotcurves(curves, 1:10)
+plotcurves(curves, 1:3, color = c("red","blue","purple"))
+plotcurves(curves, 1:10, xlim = c(0,42))
+#Note the legend is now gone:
+plotcurves(curves, 1:20)
+#and it is back again:
+plotcurves(curves, 1:20, remove_legend = FALSE)
+}
+\seealso{
+\code{\link[MTLR]{mtlr}} \code{\link[MTLR]{predict.mtlr}}
 }

@@ -1,12 +1,36 @@
 
-#' Plot the survival curves returned from MTLR with a spline fit. If over 15 survival curves are plotted the legend is removed.
+#' Graphically Visualize MTLR Survival Curves
 #'
-#' @param curves survival curves formatted the same as those from predict.mtlr. The time points must be in the first column.
-#' @param index the index of the observation to plot. Here "1" will refer to the second column of curves
+#' Plot the survival curves returned from predict.mtlr. Users must have packages ggplot2 and reshape2 installed in order to use this function.
+#' Survival curves for MTLR are smoothed using a monotonic cubic spline using a Hyman filtering between timepoints. For details regarding this
+#' smoothing function see \code{\link[stats]{splinefun}}.
+#'
+#' @param curves survival curves formatted the same as those from predict.mtlr. Time points must be in the first column of the matrix followed by
+#' columns representing survival probabilities for each observation.
+#' @param index the index of the observation to plot. Here an index of 1 will refer to the second column of the curves object. If over 15 indicies are
+#' given the legend will be removed as to not take up plotting space. To avoid this behavior set remove_legend = FALSE.
 #' @param color the color of the plotted survival curve. The length of color must match the length of index.
 #' @param xlim the limits of the x-axis (must be a 2 length vector).
+#' @param remove_legend if TRUE the legend will be removed if over 15 indicies are supplied. If FALSE the legend will remain, however be aware that the
+#' legend may take up lots of space.
+#' @examples
+#' #Set up the example:
+#' library(survival)
+#' mod = mtlr(Surv(time,status)~., data = lung)
+#' curves = predict(mod, type = "survivalcurve")
+#'
+#' plotcurves(curves, 1:10)
+#' plotcurves(curves, 1:3, color = c("red","blue","purple"))
+#' plotcurves(curves, 1:10, xlim = c(0,42))
+#'
+#' #Note the legend is now gone:
+#' plotcurves(curves, 1:20)
+#'
+#' #and it is back again:
+#' plotcurves(curves, 1:20, remove_legend = FALSE)
+#' @seealso \code{\link[MTLR]{mtlr}} \code{\link[MTLR]{predict.mtlr}}
 #' @export
-plotcurves <- function(curves, index = 1, color = c(), xlim = c()){
+plotcurves <- function(curves, index = 1, color = c(), xlim = c(), remove_legend = TRUE){
   if (!requireNamespace(c("ggplot2","reshape2"), quietly = TRUE)) {
     stop("Package \"ggplot2\" and \"reshape2\" are needed for this function to work. Please install them.",
          call. = FALSE)
@@ -48,7 +72,7 @@ plotcurves <- function(curves, index = 1, color = c(), xlim = c()){
           axis.title.y = ggplot2::element_text(margin = ggplot2::margin(r = 15)))+
     ggplot2::labs(y = "Survival Probability",x = "Time", color = "Index" )
   #If we have too many survival curves then the legend takes up the whole plot. We have an if to catch this and remove the legend.
-  if(length(index) > 15){
+  if(length(index) > 15 & remove_legend){
     pl = pl + ggplot2::theme(legend.position = "None")
   }
   return(pl)
