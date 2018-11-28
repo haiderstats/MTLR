@@ -2,24 +2,36 @@
 % Please edit documentation in R/method.R
 \name{plot.mtlr}
 \alias{plot.mtlr}
-\title{Plot the weights of the mtlr object across time. The numfeatures = 5 default plots the the 5 most influential features
-as determined by the sum of absolute values of feature weights across time. The bias is ignored in these calculations.}
+\title{Graphical Representation of Feature Weights}
 \usage{
-\method{plot}{mtlr}(x, numfeatures = 5, weightnames = c(), digits, ...)
+\method{plot}{mtlr}(x, numfeatures = 5, featurenames = c(), digits,
+  ...)
 }
 \arguments{
-\item{x}{an object of class mtlr, returned by the mtlr function.}
+\item{x}{an object of class mtlr (result from calling \code{\link[MTLR]{mtlr}}).}
 
-\item{numfeatures}{the number of weight to plot. Default is 5.}
+\item{numfeatures}{the number of weight to plot. Default is 5. The most influential features are chosen first.}
 
-\item{weightnames}{the names of the specific weight to plot. These should correspond to the names
-in mtlr$weight_matrix. If weightnames are supplied, then numfeatures is ignored.}
+\item{featurenames}{the names of the specific weight to plot. These should correspond to the names
+in x$weight_matrix. If weightnames are supplied, then numfeatures is ignored.}
 
-\item{digits}{the number of digits to round to for the time points.}
+\item{digits}{the number of digits to round to for the value of the time points.}
 
 \item{...}{for future methods}
 }
 \description{
-Plot the weights of the mtlr object across time. The numfeatures = 5 default plots the the 5 most influential features
-as determined by the sum of absolute values of feature weights across time. The bias is ignored in these calculations.
+Plot the weights of an mtlr object. If packages \code{\link[ggplot2]{ggplot2}} and reshape2 are
+not installed, a bargraph of feature \emph{influence} is given where influence is defined as the sum of absolute values of the
+feature weights across time. If ggplot2 and reshape2 are installed then a plot of feature weight across time is given.
+}
+\examples{
+#These examples are geared towards users who have installed ggplot2 and reshape2.
+library(survival)
+mod = mtlr(Surv(time,status)~., data = lung)
+#Basic plot with 5 most influential features
+plot(mod)
+#Plot all 8 features
+plot(mod, numfeatures = 8)
+#Suppose we want to see specifically the "meal.cal" and "ph.karno" features:
+plot(mod, featurenames = c("meal.cal", "ph.karno"))
 }
