@@ -27,7 +27,7 @@ feature weights across time. If ggplot2 and reshape2 are installed then a plot o
 \examples{
 #These examples are geared towards users who have installed ggplot2 and reshape2.
 library(survival)
-mod = mtlr(Surv(time,status)~., data = lung)
+mod <- mtlr(Surv(time,status)~., data = lung)
 #Basic plot with 5 most influential features
 plot(mod)
 #Plot all 8 features

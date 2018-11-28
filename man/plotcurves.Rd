@@ -29,8 +29,8 @@ smoothing function see \code{\link[stats]{splinefun}}.
 \examples{
 #Set up the example:
 library(survival)
-mod = mtlr(Surv(time,status)~., data = lung)
-curves = predict(mod, type = "survivalcurve")
+mod <- mtlr(Surv(time,status)~., data = lung)
+curves <- predict(mod, type = "survivalcurve")
 
 plotcurves(curves, 1:10)
 plotcurves(curves, 1:3, color = c("red","blue","purple"))

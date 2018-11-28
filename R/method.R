@@ -79,7 +79,7 @@ predict.mtlr <- function(object, newdata, type = c("survivalcurve","prob_event",
   surv_curves <- cbind.data.frame(time = time_points,surv_probs)
   switch(type,
          survivalcurve = surv_curves,
-         prob_event <- {
+         prob_event = {
            if(!missing(newdata)){
              mf <- stats::model.frame(object$Terms, newdata)
              y <- stats::model.response(mf)
@@ -90,10 +90,10 @@ predict.mtlr <- function(object, newdata, type = c("survivalcurve","prob_event",
            event_times <- y[,1]
            sapply(1:(ncol(surv_curves)-1), function(i) predict_prob(surv_curves[,i+1], time_points,event_times[i]))
          },
-         mean_time <- {
+         mean_time = {
            sapply(1:(ncol(surv_curves)-1),function(i) predict_mean(surv_curves[,i+1], time_points))
          },
-         median_time <- {
+         median_time = {
            sapply(1:(ncol(surv_curves)-1),function(i) predict_median(surv_curves[,i+1], time_points))
          }
   )

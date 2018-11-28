@@ -70,7 +70,7 @@ to time 42 as the loss.
 }
 \examples{
 library(survival)
-cv_mod = mtlr_cv(Surv(time,status)~., data = lung)
+cv_mod <- mtlr_cv(Surv(time,status)~., data = lung)
 #Note the best C1 also corresponds to the lost average loss:
 cv_mod
 }

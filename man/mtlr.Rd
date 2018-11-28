@@ -75,10 +75,10 @@ is not required for smoothness and C1 will suffice (Appendix A.2) so we do not s
 \examples{
 #Access the Surv function and the leukemia/lung dataset.
 library(survival)
-simple_mod = mtlr(Surv(time,status)~., data = leukemia)
+simple_mod <- mtlr(Surv(time,status)~., data = leukemia)
 simple_mod
 
-bigger_mod = mtlr(Surv(time,status)~., data = lung)
+bigger_mod <- mtlr(Surv(time,status)~., data = lung)
 bigger_mod
 
 #Note that observations with missing data were removed:

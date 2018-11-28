@@ -84,17 +84,17 @@ foldme <- function(time, delta, nfolds,foldtype = c("fullstrat","censorstrat","r
     stop("Number of folds must be greater than 0.")
   type <- match.arg(foldtype)
   foldIndex <- switch(type,
-                     fullstrat <- {
+                     fullstrat = {
                        Order<- order(delta,time)
                        lapply(1:nfolds, function(x) Order[seq(x,length(time), by = nfolds)])
                      },
-                     censorstrat <- {
+                     censorstrat = {
                        censored <- sample(which(!delta))
                        uncensored <- sample(which(!!delta))
                        Order<- c(censored,uncensored)
                        lapply(1:nfolds, function(x) Order[seq(x,length(time), by = nfolds)])
                      },
-                     random <- {
+                     random = {
                        Order <- sample(length(time))
                        lapply(1:nfolds, function(x) Order[seq(x,length(time), by = nfolds)])
                      }
