@@ -102,7 +102,7 @@ foldme <- function(time, delta, nfolds,foldtype = c("fullstrat","censorstrat","r
   return(foldIndex)
 }
 
-log_loss <- function(object, newdata){
+loglik_loss <- function(object, newdata){
   #For the loss we need to compute losses differently for censored and uncensored patients.
   #For censored patients the loss will correspond the the (log) survival probability assigned by the model at the time of censoring.
   #For uncensored patients, we will consider the log of the probability assigned to the time interval when the patient died.
