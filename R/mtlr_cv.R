@@ -11,7 +11,13 @@
 #' Censored stratification, "censorstrat", will put approximately the same number of uncensored observations in each fold but not pay any attention to
 #' event time. This is partially stochastic. The totally random cross-validation, "random", randomly assigns observations to folds without considering
 #' event time nor event status.
-#' @details Explain the log-likelihood loss.
+#' @details Currently only the log-likelihood loss is supported for optimizing C1. Here the loss considers censored and uncensored observations differently.
+#' For uncensored observations, we assign a loss of the negative log probability assigned to the interval in which the observation had their event, \emph{e.g.}
+#' if an observation had a 20% chance of having its event between timepoint1 and timepoint2 and it did have it's event in that interval then the loss
+#' is -log(0.2). We want these probabilities to be large so we would normally want to maximize this value (since logs of probabilities are negative)
+#' but we take the negative and instead minimize the value, thus we want the lowest loss. For censored observations we take the log of the probability
+#' of survival at the time of censoring, \emph{e.g.} if an observation is censored at time = 42 we take the negative log of the survival probability assigned
+#' to time 42 as the loss.
 #' @return Performing mtlr_cv will return the following:
 #' \itemize{
 #'   \item best_C1: The value of C1 which achieved the best (lowest) loss.
