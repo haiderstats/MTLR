@@ -53,6 +53,20 @@ NULL
 #'   NULL if normalize = FALSE.
 #'   \item xlevels: The levels of the features used. This is used again by \code{\link[MTLR]{predict.mtlr}}.
 #' }
+#' @examples
+#' #Access the Surv function and the leukemia/lung dataset.
+#' library(survival)
+#' simple_mod = mtlr(Surv(time,status)~., data = leukemia)
+#' simple_mod
+#'
+#' bigger_mod = mtlr(Surv(time,status)~., data = lung)
+#' bigger_mod
+#'
+#' #Note that observations with missing data were removed:
+#' nrow(lung)
+#' nrow(bigger_mod$x)
+#'
+#'
 #' @seealso
 #' \code{\link[MTLR]{predict.mtlr}} \code{\link[MTLR]{plot.mtlr}} \code{\link[MTLR]{mtlr_cv}} \code{\link[MTLR]{predict.mtlr}}
 #' @export

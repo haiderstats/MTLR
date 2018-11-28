@@ -72,6 +72,21 @@ Yu et al. (2011) actually suggested two regularization parameters, C1 to control
 In Ping Jin's masters thesis (Using Survival Prediction Techniques to Learn Consumer-Specific Reservation Price Distributions) he showed that C2
 is not required for smoothness and C1 will suffice (Appendix A.2) so we do not support the C2 parameter in this implemenetation.
 }
+\examples{
+#Access the Surv function and the leukemia/lung dataset.
+library(survival)
+simple_mod = mtlr(Surv(time,status)~., data = leukemia)
+simple_mod
+
+bigger_mod = mtlr(Surv(time,status)~., data = lung)
+bigger_mod
+
+#Note that observations with missing data were removed:
+nrow(lung)
+nrow(bigger_mod$x)
+
+
+}
 \seealso{
 \code{\link[MTLR]{predict.mtlr}} \code{\link[MTLR]{plot.mtlr}} \code{\link[MTLR]{mtlr_cv}} \code{\link[MTLR]{predict.mtlr}}
 }

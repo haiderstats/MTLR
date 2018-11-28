@@ -23,12 +23,14 @@ a default of sqrt(N) is used where N is the number of observations in the suppli
 does not occur it is much more likely that MTLR will fail to converge. Additionally, if FALSE consider adjusting "lower" and "upper"
 used for L-BFGS-B optimization.}
 
-\item{C1_vec}{a vector of regularization parameters to test. All values must be non-negative.}
+\item{C1_vec}{a vector of regularization parameters to test. All values must be non-negative. For large datasets you may want to reduce the number
+of value tried to increase efficiency. Similarly for nfolds.}
 
 \item{train_biases}{if TRUE, biases will be trained before feature weights (and again trained while training feature weights). This
 has shown to speed up total training time.}
 
-\item{loss}{a string indicating the loss to optimize for which to choose the regularization parameter. Currently on the log-loss (ll) is supported.}
+\item{loss}{a string indicating the loss to optimize for which to choose the regularization parameter. Currently only the log-likelihood (ll)
+is supported.}
 
 \item{nfolds}{the number of internal cross validation folds, default is 5.}
 
@@ -58,7 +60,19 @@ Performing mtlr_cv will return the following:
 MTLR Internal Cross-Validation for Selecting C1.
 }
 \details{
-Explain the log-loss.
+Currently only the log-likelihood loss is supported for optimizing C1. Here the loss considers censored and uncensored observations differently.
+For uncensored observations, we assign a loss of the negative log probability assigned to the interval in which the observation had their event, \emph{e.g.}
+if an observation had a 20% chance of having its event between timepoint1 and timepoint2 and it did have it's event in that interval then the loss
+is -log(0.2). We want these probabilities to be large so we would normally want to maximize this value (since logs of probabilities are negative)
+but we take the negative and instead minimize the value, thus we want the lowest loss. For censored observations we take the log of the probability
+of survival at the time of censoring, \emph{e.g.} if an observation is censored at time = 42 we take the negative log of the survival probability assigned
+to time 42 as the loss.
+}
+\examples{
+library(survival)
+cv_mod = mtlr_cv(Surv(time,status)~., data = lung)
+#Note the best C1 also corresponds to the lost average loss:
+cv_mod
 }
 \seealso{
 \code{\link[MTLR]{mtlr}}

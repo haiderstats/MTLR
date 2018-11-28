@@ -1,7 +1,8 @@
 #' MTLR Internal Cross-Validation for Selecting C1.
 #'
 #' @inheritParams mtlr
-#' @param C1_vec a vector of regularization parameters to test. All values must be non-negative.
+#' @param C1_vec a vector of regularization parameters to test. All values must be non-negative. For large datasets you may want to reduce the number
+#' of value tried to increase efficiency. Similarly for nfolds.
 #' @param loss a string indicating the loss to optimize for which to choose the regularization parameter. Currently only the log-likelihood (ll)
 #'  is supported.
 #' @param nfolds the number of internal cross validation folds, default is 5.
@@ -23,6 +24,11 @@
 #'   \item best_C1: The value of C1 which achieved the best (lowest) loss.
 #'   \item avg_loss: The averaged value of loss across the five folds for each value of C1 tested.
 #'   }
+#' @examples
+#' library(survival)
+#' cv_mod = mtlr_cv(Surv(time,status)~., data = lung)
+#' #Note the best C1 also corresponds to the lost average loss:
+#' cv_mod
 #' @seealso \code{\link[MTLR]{mtlr}}
 #' @export
 mtlr_cv <- function(formula,
