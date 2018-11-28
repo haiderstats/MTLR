@@ -5,7 +5,7 @@ testthat::context("plotcurves is consistent with previous plots.")
 # plotcurves ------------------------------------------------------------
 testthat::test_that("plotcurves function is consistent",{
   formula = survival::Surv(time,status)~.
-  data = survival::leukemia
+  data = survival::lung
   mod = mtlr(formula,data)
   curves = predict(mod)
   expect_warning(plotcurves(curves, index=  1:3, color = c("red","green")))
