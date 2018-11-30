@@ -53,14 +53,12 @@ testthat::test_that("mtlr argument specifications are working.",{
   formula = survival::Surv(time,status)~.
   data = survival::leukemia
   data$time[1] = -10
-  expect_error(mtlr(formula,data),"All event times must be positive.")
+  expect_error(mtlr(formula,data),"All event times must be non-negative")
   data$time[1] = 10
 
   formula = time~.
   expect_error(mtlr(formula,data),"The response must be a Surv object.")
 
-  formula = survival::Surv(time,status,type = "left")~.
-  expect_error(mtlr(formula,data),"Currently only right censored data is supported.")
   formula = survival::Surv(time,status)~.
 
   expect_error(mtlr(formula,data, C1 = -10),"C1 must be non-negative.")
