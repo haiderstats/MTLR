@@ -54,7 +54,7 @@ An mtlr object returns the following:
 }
 }
 \description{
-Trains a MTLR model for survival prediction. Right, left, and interval censored data is all supported.
+Trains a MTLR model for survival prediction. Right, left, and interval censored data are all supported.
 }
 \details{
 This function allows one to train an MTLR model given a dataset containing survival data. mtlr uses the Limited-Memory
@@ -71,6 +71,12 @@ package will add more options to address this non-convexity.
 Yu et al. (2011) actually suggested two regularization parameters, C1 to control the size of the feature weights and C2 to control the smoothness.
 In Ping Jin's masters thesis (Using Survival Prediction Techniques to Learn Consumer-Specific Reservation Price Distributions) he showed that C2
 is not required for smoothness and C1 will suffice (Appendix A.2) so we do not support the C2 parameter in this implemenetation.
+
+\strong{Censored data:} Right, left, and interval censored data are all supported both seperately and mixed. The convention to input these types of
+data follows the \link[survival]{Surv} object format.
+Per the Surv documentation, "The [interval2] approach is to think of each observation as a time interval with (-infinity, t) for left censored,
+(t, infinity) for right censored, (t,t) for exact and (t1, t2) for an interval. This is the approach used for type = interval2.
+Infinite values can be represented either by actual infinity (Inf) or NA." See the examples below for an example of inputting this type of data.
 }
 \examples{
 #Access the Surv function and the leukemia/lung dataset.
@@ -85,6 +91,14 @@ bigger_mod
 nrow(lung)
 nrow(bigger_mod$x)
 
+# Mixed censoring types
+time1 = c(NA, 4, 7, 12, 10, 6, NA, 3) #NA for right censored
+time2 = c(14, 4, 10, 12, NA, 9, 5, NA) #NA for left censored
+#time1 == time2 indicates an exact death time. time2> time1 indicates interval censored.
+set.seed(42)
+dat = cbind.data.frame(time1, time2, importantfeature = rnorm(8))
+formula = Surv(time1,time2,type = "interval2")~.
+mixedmod = mtlr(formula, dat)
 
 }
 \seealso{

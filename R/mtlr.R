@@ -4,7 +4,7 @@ NULL
 
 #' Train a Mutli-Task Logistic Regression (MTLR) Model
 #'
-#' Trains a MTLR model for survival prediction. Right, left, and interval censored data is all supported.
+#' Trains a MTLR model for survival prediction. Right, left, and interval censored data are all supported.
 #'
 #' @param formula a formula object with the response to the left of the "~" operator. The response must be a survival object returned
 #' by the \code{\link[survival]{Surv}} function.
@@ -37,6 +37,11 @@ NULL
 #' In Ping Jin's masters thesis (Using Survival Prediction Techniques to Learn Consumer-Specific Reservation Price Distributions) he showed that C2
 #' is not required for smoothness and C1 will suffice (Appendix A.2) so we do not support the C2 parameter in this implemenetation.
 #'
+#'\strong{Censored data:} Right, left, and interval censored data are all supported both seperately and mixed. The convention to input these types of
+#'data follows the \link[survival]{Surv} object format.
+#'Per the Surv documentation, "The [interval2] approach is to think of each observation as a time interval with (-infinity, t) for left censored,
+#'(t, infinity) for right censored, (t,t) for exact and (t1, t2) for an interval. This is the approach used for type = interval2.
+#'Infinite values can be represented either by actual infinity (Inf) or NA." See the examples below for an example of inputting this type of data.
 #' @return An mtlr object returns the following:
 #' \itemize{
 #'   \item weight_matrix: The matrix of feature weights determined by MTLR.
@@ -66,6 +71,14 @@ NULL
 #' nrow(lung)
 #' nrow(bigger_mod$x)
 #'
+#' # Mixed censoring types
+#' time1 = c(NA, 4, 7, 12, 10, 6, NA, 3) #NA for right censored
+#' time2 = c(14, 4, 10, 12, NA, 9, 5, NA) #NA for left censored
+#' #time1 == time2 indicates an exact death time. time2> time1 indicates interval censored.
+#' set.seed(42)
+#' dat = cbind.data.frame(time1, time2, importantfeature = rnorm(8))
+#' formula = Surv(time1,time2,type = "interval2")~.
+#' mixedmod = mtlr(formula, dat)
 #'
 #' @seealso
 #' \code{\link[MTLR]{predict.mtlr}} \code{\link[MTLR]{plot.mtlr}} \code{\link[MTLR]{mtlr_cv}} \code{\link[MTLR]{predict.mtlr}}
@@ -94,13 +107,13 @@ mtlr <- function(formula,
   if (!survival::is.Surv(y))
     stop("The response must be a Surv object.")
   type = attr(y,"type")
-  if(!type %in% c("right", "left","interval2"))
-    stop("Currently only right, left, and interval2 censored data is supported. See the Details section of ?mtlr.")
+  if(!type %in% c("right", "left","interval","interval2"))
+    stop("Currently only right, left,interval, and interval2 censored data is supported. See the Details section of ?mtlr.")
 
   time <- y[,1]
   if(any(time < 0))
     stop("All event times must be non-negative.")
-  if(type == "interval2"){
+  if(type %in% c("interval","interval2")){
     time2 = y[,2]
     delta <- y[,3] #Death indicator (right censored = 0, death = 1, left censored = 2, interval censored = 3)
   }else{
@@ -130,7 +143,6 @@ mtlr <- function(formula,
   #we make these negative first.
   delta = ifelse(delta == 1,1,-delta)
   ord <- order(delta)
-
   if(ncol(x)){
     x <- x[ord,1:ncol(x),drop=FALSE]
   }
@@ -172,12 +184,13 @@ mtlr <- function(formula,
   #were uncensored (this creates "good" starting values since with censored patients the objective is non-convex). Then we finally
   #train the data with their true censor statuses.
   threshold_factor <- threshold/.Machine$double.eps
+  censInd = ifelse(delta <1,0,1)
 
   if(train_biases){
     zero_matrix <- matrix(0,ncol = ncol(x), nrow = nrow(x))   #We create a zero_matrix to train the biases
 
     bias_par <- stats::optim(par = rep(0,length(time_points)*(ncol(x) +1)),fn = mtlr_objVal,gr = mtlr_grad, yval = y_matrix,
-                             featureVal = zero_matrix, C1=C1, delta = sort(delta),
+                             featureVal = zero_matrix, C1=C1, delta = sort(censInd),
                              method = "L-BFGS-B", lower = lower, upper = upper, control = c(maxit = maxit, factr = threshold_factor))
     if(bias_par$convergence == 52)
       stop(paste("Error occured while training MTLR. Optim Error: ", bias_par$message))
@@ -190,7 +203,7 @@ mtlr <- function(formula,
   if(params_uncensored$convergence == 52)
     stop(paste("Error occured while training MTLR. Optim Error: ", params_uncensored$message))
 
-  final_params <- stats::optim(par = params_uncensored$par,fn = mtlr_objVal,gr = mtlr_grad, yval = y_matrix, featureVal = x, C1 = C1,delta = sort(delta),
+  final_params <- stats::optim(par = params_uncensored$par,fn = mtlr_objVal,gr = mtlr_grad, yval = y_matrix, featureVal = x, C1 = C1,delta = sort(censInd),
                                method = "L-BFGS-B", lower = lower, upper = upper, control = c(maxit = maxit, factr = threshold_factor))
   if(final_params$convergence == 52)
     stop(paste("Error occured while training MTLR. Optim Error: ", final_params$message))
