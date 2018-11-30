@@ -151,7 +151,7 @@ mtlr <- function(formula,
                       nrow = length(time_points)+1, byrow = T)
     y_matrix <- cbind(y_right, y_uncen)
   } else if(type == "left"){
-    y_left <- matrix(as.numeric(Reduce(c,Map(function(ind) time[delta == -2] >= c(0,time_points)[ind],
+    y_left <- matrix(as.numeric(Reduce(c,Map(function(ind) time[delta == 0] >= c(0,time_points)[ind],
                                              seq_along(c(time_points,Inf))))), nrow = length(time_points) +1, byrow = T)
     y_uncen <- matrix(as.numeric(Reduce(c,Map(function(ind) time[delta == 1] < c(time_points,Inf)[ind], seq_along(c(time_points,Inf))))),
                       nrow = length(time_points)+1, byrow = T)
