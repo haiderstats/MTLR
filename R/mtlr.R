@@ -170,7 +170,7 @@ mtlr <- function(formula,
   if(train_biases){
     zero_matrix <- matrix(0,ncol = ncol(x), nrow = nrow(x))   #We create a zero_matrix to train the biases
 
-    bias_par <- stats::optim(par = rep(0,length(time_points)*(ncol(x) +1)),fn = mtlr_objVal,gr = mtlr_grad, yval = y_matrix,
+    bias_par <- stats::optim(par = rep(0,length(time_points)*(ncol(x) +1)),fn = mtlr_objVal2,gr = mtlr_grad2, yval = rbind(y_matrix,1),
                      featureVal = zero_matrix, C1=C1, delta = sort(delta),
                      method = "L-BFGS-B", lower = lower, upper = upper, control = c(maxit = maxit, factr = threshold_factor))
     if(bias_par$convergence == 52)
@@ -179,12 +179,12 @@ mtlr <- function(formula,
     bias_par <- list(par = rep(0,length(time_points)*(ncol(x) +1)))
   }
 
-  params_uncensored <- stats::optim(par = bias_par$par,fn = mtlr_objVal, gr = mtlr_grad, yval = y_matrix, featureVal = x, C1 = C1, delta = rep(1,nrow(x)),
+  params_uncensored <- stats::optim(par = bias_par$par,fn = mtlr_objVal2, gr = mtlr_grad2, yval = rbind(y_matrix,1), featureVal = x, C1 = C1, delta = rep(1,nrow(x)),
                        method = "L-BFGS-B", lower = lower, upper = upper, control = c(maxit = maxit, factr = threshold_factor))
   if(params_uncensored$convergence == 52)
     stop(paste("Error occured while training MTLR. Optim Error: ", params_uncensored$message))
 
-  final_params <- stats::optim(par = params_uncensored$par,fn = mtlr_objVal,gr = mtlr_grad, yval = y_matrix, featureVal = x, C1 = C1,delta = sort(delta),
+  final_params <- stats::optim(par = params_uncensored$par,fn = mtlr_objVal2,gr = mtlr_grad2, yval = rbind(y_matrix,1), featureVal = x, C1 = C1,delta = sort(delta),
                     method = "L-BFGS-B", lower = lower, upper = upper, control = c(maxit = maxit, factr = threshold_factor))
   if(final_params$convergence == 52)
     stop(paste("Error occured while training MTLR. Optim Error: ", final_params$message))
