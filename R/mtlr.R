@@ -93,14 +93,19 @@ mtlr <- function(formula,
 
   if (!survival::is.Surv(y))
     stop("The response must be a Surv object.")
-  if(attr(y, "type") != "right")
-    stop("Currently only right censored data is supported.")
+  type = attr(y,"type")
+  if(!type %in% c("right", "left","interval2"))
+    stop("Currently only right, left, and interval2 censored data is supported. See the Details section of ?mtlr.")
 
   time <- y[,1]
-  delta <- y[,2] #Death indicator (censored = 0, death = 1)
-
   if(any(time < 0))
-    stop("All event times must be positive.")
+    stop("All event times must be non-negative.")
+  if(type == "interval2"){
+    time2 = y[,2]
+    delta <- y[,3] #Death indicator (right censored = 0, death = 1, left censored = 2, interval censored = 3)
+  }else{
+    delta <- y[,2] #Death indicator (right censored = 0, death = 1, left censored = 2, interval censored = 3)
+  }
   if(C1 < 0)
     stop("C1 must be non-negative.")
   if(threshold <= 0)
@@ -121,7 +126,9 @@ mtlr <- function(formula,
   #Prepare data for MTLR Rcpp functions.
   #The Rcpp functions are built to work on data that comes in with observations ordered by their event status
   #(censored observations first).
-  #Here we order our data by the censor status.
+  #Here we order our data by the censor status. However, since left and interval censored are coded as 2,3
+  #we make these negative first.
+  delta = ifelse(delta == 1,1,-delta)
   ord <- order(delta)
 
   if(ncol(x)){
@@ -137,7 +144,29 @@ mtlr <- function(formula,
 
   #We make a matrix where each column is a vector of indicators if an observation is dead at each time point, e.g. (0,0,,...,0,1,1,...1).
   #(See 'Learning Patient-Specific Cancer Survival Distributions as a Sequence of Dependent Regressors' Page 3.)
-  y_matrix <- matrix(1 - Reduce(c,Map(function(ind) time[ord] >= time_points[ind], seq_along(time_points))), ncol = length(time), byrow = T)
+  if(type =="right"){
+    y_right <- matrix(as.numeric(Reduce(c,Map(function(ind) time[delta == 0] < c(time_points,Inf)[ind], seq_along(c(time_points,Inf))))),
+                      nrow = length(time_points)+1, byrow = T)
+    y_uncen <- matrix(as.numeric(Reduce(c,Map(function(ind) time[delta == 1] < c(time_points,Inf)[ind], seq_along(c(time_points,Inf))))),
+                      nrow = length(time_points)+1, byrow = T)
+    y_matrix <- cbind(y_right, y_uncen)
+  } else if(type == "left"){
+    y_left <- matrix(as.numeric(Reduce(c,Map(function(ind) time[delta == -2] >= c(0,time_points)[ind],
+                                             seq_along(c(time_points,Inf))))), nrow = length(time_points) +1, byrow = T)
+    y_uncen <- matrix(as.numeric(Reduce(c,Map(function(ind) time[delta == 1] < c(time_points,Inf)[ind], seq_along(c(time_points,Inf))))),
+                      nrow = length(time_points)+1, byrow = T)
+    y_matrix <- cbind(y_left,y_uncen)
+  } else{
+    y_int <- matrix(as.numeric(Reduce(c,Map(function(ind) time[delta == -3] <= c(time_points,Inf)[ind] & time2[delta == -3] > c(0,time_points)[ind],
+                                            seq_along(c(time_points,Inf))))), nrow = length(time_points)+1, byrow = T)
+    y_left <- matrix(as.numeric(Reduce(c,Map(function(ind) time[delta == -2] >= c(0,time_points)[ind],
+                                             seq_along(c(time_points,Inf))))), nrow = length(time_points) +1, byrow = T)
+    y_right <- matrix(as.numeric(Reduce(c,Map(function(ind) time[delta == 0] < c(time_points,Inf)[ind], seq_along(c(time_points,Inf))))),
+                      nrow = length(time_points)+1, byrow = T)
+    y_uncen <- matrix(as.numeric(Reduce(c,Map(function(ind) time[delta == 1] < c(time_points,Inf)[ind], seq_along(c(time_points,Inf))))),
+                      nrow = length(time_points)+1, byrow = T)
+    y_matrix <- cbind(y_int, y_left, y_right, y_uncen)
+  }
 
   #We first train the biases (by setting feature parameters to zero (dAsZero)). Then we train the feature values as if all patients
   #were uncensored (this creates "good" starting values since with censored patients the objective is non-convex). Then we finally

@@ -34,7 +34,7 @@ using namespace std;
 // would need to be repeated many times (i.e. ordering yval and feature val by delta). Additionally, we assume that delta =0 means any type of censoring
 // not just right censoring (the code is written so all censored instances are handled the same but dependent on yval).
 
-
+/*
 // [[Rcpp::export]]
 double mtlr_objVal(NumericVector params, arma::mat yval, arma::mat featureValue, double C1,arma::vec delta) {
   //For the objective value see Equation 3 of the MTLR paper.
@@ -102,9 +102,9 @@ double mtlr_objVal(NumericVector params, arma::mat yval, arma::mat featureValue,
   valToReturn = (C1/2)*accu(square(thetas)) - valToReturn/N;
   return valToReturn;
 }
+*/
 
 
-/*
 // [[Rcpp::export]]
 double mtlr_objVal(NumericVector params, arma::mat yval, arma::mat featureValue, double C1,arma::vec delta) {
   //For the objective value see Equation 3 of the MTLR paper.
@@ -188,7 +188,7 @@ double mtlr_objVal(NumericVector params, arma::mat yval, arma::mat featureValue,
   valToReturn = (C1/2)*accu(square(thetas)) - valToReturn/N;
   return valToReturn;
 }
-*/
+
 
 
 //See mtlr_objVal for argument definition.
@@ -199,7 +199,7 @@ double mtlr_objVal(NumericVector params, arma::mat yval, arma::mat featureValue,
 // //' @inheritParams mtlr_objVal
 // //' @export
 
-
+/*
 // [[Rcpp::export]]
  arma::rowvec mtlr_grad(NumericVector params, arma::mat yval, arma::mat featureValue, double C1, arma::vec delta) {
   double N = featureValue.n_rows;
@@ -308,8 +308,8 @@ double mtlr_objVal(NumericVector params, arma::mat yval, arma::mat featureValue,
   arma::vec ThetaFlat = vectorise(ThetaGradient);
   return arma::join_cols<arma::mat>(BiasGradient, ThetaFlat).t();
 }
+*/
 
-/*
 //See mltr_objVal for argument definitions.
 // [[Rcpp::export]]
 arma::rowvec mtlr_grad(NumericVector params, arma::mat yval, arma::mat featureValue, double C1, arma::vec delta) {
@@ -446,7 +446,7 @@ arma::rowvec mtlr_grad(NumericVector params, arma::mat yval, arma::mat featureVa
   arma::vec ThetaFlat = vectorise(ThetaGradient);
   return arma::join_cols<arma::mat>(BiasGradient, ThetaFlat).t();
 }
-*/
+
 
 //See mltr_objVal for argument definitions.
 // //' Predict survival curves.
