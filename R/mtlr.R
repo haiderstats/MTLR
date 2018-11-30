@@ -9,8 +9,11 @@ NULL
 #' @param formula a formula object with the response to the left of the "~" operator. The response must be a survival object returned
 #' by the \code{\link[survival]{Surv}} function.
 #' @param data a data.frame containing the features for survival prediction. These must be variables corresponding to the formula object.
+#' @param time_points the time points for MTLR to create weights. If left as NULL, the time_points chosen will be based on equally spaced quantiles
+#' of the survival times. In the case of interval censored data note that only the start time is considered and not the end time for selecting time points.
+#' It is strongly reccommended to specify time points if your data is heavily interval censored. If time_points is not NULL then nintervals is ignored.
 #' @param nintervals Number of time intervals to use for MTLR. Note the number of time points will be nintervals + 1. If left as NULL
-#' a default of sqrt(N) is used where N is the number of observations in the supplied dataset.
+#' a default of sqrt(N) is used where N is the number of observations in the supplied dataset. This parameter is ignored if time_points is specified.
 #' @param normalize if TRUE, variables will be normalized (mean 0, standard deviation of 1). This is STRONGLY suggested. If normalization
 #' does not occur it is much more likely that MTLR will fail to converge. Additionally, if FALSE consider adjusting "lower" and "upper"
 #' used for L-BFGS-B optimization.
@@ -85,6 +88,7 @@ NULL
 #' @export
 mtlr <- function(formula,
                  data,
+                 time_points = NULL,
                  nintervals = NULL,
                  normalize = T,
                  C1 = 1,
@@ -124,7 +128,7 @@ mtlr <- function(formula,
   if(threshold <= 0)
     stop("The threshold must be positive.")
 
-  if(is.null(nintervals))
+  if(is.null(nintervals) & is.null(time_points))
     nintervals <- ceiling(sqrt(nrow(y))) #Default number of intervals is the sq. root of the number of observations.
   if(normalize){
     x <- scale(x)
@@ -147,9 +151,14 @@ mtlr <- function(formula,
     x <- x[ord,1:ncol(x),drop=FALSE]
   }
 
-  m <- nintervals + 1   #The number of time points to evaulate will be the number of time intervals + 1.
-  quantiles <- seq(0,1,length.out = m+2)[-c(1,m+2)] #We will select time point based on the distribution of the times.
-  time_points <- unname(stats::quantile(time, quantiles))
+  if(!is.null(nintervals) & is.null(time_points)){
+    m <- nintervals + 1   #The number of time points to evaulate will be the number of time intervals + 1.
+    quantiles <- seq(0,1,length.out = m+2)[-c(1,m+2)] #We will select time point based on the distribution of the times.
+    time_points <- unname(stats::quantile(time, quantiles))
+  } #Otherwise time_points is not null and we use the user inputted values
+  if(!is.numeric(time_points))
+    stop("time_points must be a numeric vector")
+
 
 
   time_points <- time_points[!duplicated(time_points)]#Small data (or common event times) we will have duplicated time points -- we remove them.

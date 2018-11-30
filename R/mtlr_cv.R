@@ -33,6 +33,7 @@
 #' @export
 mtlr_cv <- function(formula,
                  data,
+                 time_points = NULL,
                  nintervals = NULL,
                  normalize = T,
                  C1_vec = c(0.001,0.01,0.1,1,10,100,1000),
@@ -62,7 +63,7 @@ mtlr_cv <- function(formula,
     datacv <- data[-fold_index[[fold]],]
     result <- c()
     for(i in C1_vec){
-      mod <- mtlr(formula, datacv,nintervals,normalize,i, train_biases, threshold, maxit, lower, upper)
+      mod <- mtlr(formula, datacv,time_points,nintervals,normalize,i, train_biases, threshold, maxit, lower, upper)
       result <- c(result, loglik_loss(mod,data[fold_index[[fold]],]))
     }
     res_mat[fold,] <- result

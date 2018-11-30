@@ -4,11 +4,11 @@
 \alias{mtlr_cv}
 \title{MTLR Internal Cross-Validation for Selecting C1.}
 \usage{
-mtlr_cv(formula, data, nintervals = NULL, normalize = T,
-  C1_vec = c(0.001, 0.01, 0.1, 1, 10, 100, 1000), train_biases = T,
-  loss = c("ll"), nfolds = 5, foldtype = c("fullstrat",
-  "censorstrat", "random"), threshold = 1e-05, maxit = 5000,
-  lower = -20, upper = 20)
+mtlr_cv(formula, data, time_points = NULL, nintervals = NULL,
+  normalize = T, C1_vec = c(0.001, 0.01, 0.1, 1, 10, 100, 1000),
+  train_biases = T, loss = c("ll"), nfolds = 5,
+  foldtype = c("fullstrat", "censorstrat", "random"),
+  threshold = 1e-05, maxit = 5000, lower = -20, upper = 20)
 }
 \arguments{
 \item{formula}{a formula object with the response to the left of the "~" operator. The response must be a survival object returned
@@ -16,8 +16,12 @@ by the \code{\link[survival]{Surv}} function.}
 
 \item{data}{a data.frame containing the features for survival prediction. These must be variables corresponding to the formula object.}
 
+\item{time_points}{the time points for MTLR to create weights. If left as NULL, the time_points chosen will be based on equally spaced quantiles
+of the survival times. In the case of interval censored data note that only the start time is considered and not the end time for selecting time points.
+It is strongly reccommended to specify time points if your data is heavily interval censored. If time_points is not NULL then nintervals is ignored.}
+
 \item{nintervals}{Number of time intervals to use for MTLR. Note the number of time points will be nintervals + 1. If left as NULL
-a default of sqrt(N) is used where N is the number of observations in the supplied dataset.}
+a default of sqrt(N) is used where N is the number of observations in the supplied dataset. This parameter is ignored if time_points is specified.}
 
 \item{normalize}{if TRUE, variables will be normalized (mean 0, standard deviation of 1). This is STRONGLY suggested. If normalization
 does not occur it is much more likely that MTLR will fail to converge. Additionally, if FALSE consider adjusting "lower" and "upper"
