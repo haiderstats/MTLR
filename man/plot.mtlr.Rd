@@ -20,7 +20,7 @@ in x$weight_matrix. If featurenames are supplied, then numfeatures is ignored.}
 \item{...}{for future methods}
 }
 \description{
-Plot the weights of an mtlr object. If packages \code{\link[ggplot2]{ggplot2}} and reshape2 are
+Plot the weights of an mtlr object. If packages ggplot2 and reshape2 are
 not installed, a bargraph of feature \emph{influence} is given where influence is defined as the sum of absolute values of the
 feature weights across time. If ggplot2 and reshape2 are installed then a plot of feature weight across time is given.
 }
