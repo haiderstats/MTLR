@@ -1,10 +1,6 @@
 #include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
 
-
-// Enable lambda expressions....
-// [[Rcpp::plugins(cpp11)]]
-
 using namespace Rcpp;
 using namespace std;
 
@@ -33,77 +29,6 @@ using namespace std;
 //We could abstract (fairly easily) away from this requirement, however, since this is the bottleneck of the code we try to outsource operations which
 // would need to be repeated many times (i.e. ordering yval and feature val by delta). Additionally, we assume that delta =0 means any type of censoring
 // not just right censoring (the code is written so all censored instances are handled the same but dependent on yval).
-
-/*
-// [[Rcpp::export]]
-double mtlr_objVal(NumericVector params, arma::mat yval, arma::mat featureValue, double C1,arma::vec delta) {
-  //For the objective value see Equation 3 of the MTLR paper.
-
-  //We passed params in as a NumericVector because these are easier to parse and turn into a matrix.
-  double valToReturn = 0;
-  int N = featureValue.n_rows;
-  int m = yval.n_rows;
-  Range biasIdx(0,m-1);
-
-  NumericVector biasVec = params[biasIdx];
-  NumericMatrix thetaMatrix(m,featureValue.n_cols);
-  int thetaSize = thetaMatrix.nrow() * thetaMatrix.ncol();
-  for (int i = 0; i < thetaSize; i++) {
-    thetaMatrix[i] = params[m+i];
-  }
-
-  arma::mat thetas = as<arma::mat>(thetaMatrix);
-  arma::vec biases = as<arma::vec>(biasVec);
-
-  arma::vec val(m,arma::fill::ones);
-  arma::vec bigVal(m, arma::fill::ones);
-  arma::vec secondPieceVal(m, arma::fill::ones);
-  arma::vec firstPieceVal(m, arma::fill::ones);
-  arma::uvec uncensoredIndex;
-  //Censored Piece
-  double NCens = sum(1-delta);
-  double firstPiece;
-  double biggestCensVal;
-  double biggestVal;
-  //For the censored individuals (see Equation 4)... and take the log to get the log-likelihood.
-  for(int i=0;i<NCens;i++){
-    val =  thetas * featureValue.row(i).t() + biases;
-    bigVal  = reverse(cumsum(reverse(val)));
-    // log trick: https://timvieira.github.io/blog/post/2014/02/11/exp-normalize-trick/
-    biggestVal = bigVal.max() > 0 ? bigVal.max() : 0;
-    secondPieceVal = bigVal - biggestVal;
-    double secondPiece = biggestVal + log(sum(exp(secondPieceVal))+exp(-biggestVal));
-
-    uncensoredIndex = find(yval.col(i) == 1);
-
-    if(uncensoredIndex.size() ==0){
-      firstPiece = 0;
-    }else{
-      biggestCensVal  = bigVal.elem(uncensoredIndex).max() > 0 ? bigVal.elem(uncensoredIndex).max() : 0 ;
-      firstPieceVal = bigVal - biggestCensVal;
-      //we multiply firstPieceVal by ycol to 0 out the other large values in bigVal. Note while this will make exp(0) = 1, it will again be zeroed out by multiplying by y.col(i) again.
-      firstPieceVal %= yval.col(i);
-      firstPiece = biggestCensVal + log(sum(yval.col(i) % exp(firstPieceVal)) + exp(-biggestCensVal));
-    }
-    valToReturn += firstPiece - secondPiece;
-
-  }
-  //For the uncensored individuals.
-  for(int i=NCens;i<N;i++){
-    val =  thetas * featureValue.row(i).t() + biases;
-    bigVal  = reverse(cumsum(reverse(val)));
-    double biggestVal  = bigVal.max();
-    bigVal -= biggestVal;
-    double secondPiece = biggestVal + log(sum(exp(bigVal))+exp(-biggestVal));
-    double firstPiece = sum(yval.col(i).t() * val);
-    valToReturn += firstPiece - secondPiece;
-  }
-
-  valToReturn = (C1/2)*accu(square(thetas)) - valToReturn/N;
-  return valToReturn;
-}
-*/
-
 
 // [[Rcpp::export]]
 double mtlr_objVal(NumericVector params, arma::mat yval, arma::mat featureValue, double C1,arma::vec delta) {
@@ -194,123 +119,6 @@ double mtlr_objVal(NumericVector params, arma::mat yval, arma::mat featureValue,
 //See mtlr_objVal for argument definition.
 //Here we will assume that the data is ordered such that all censored observations come first. We could abstract (fairly easily)
 //away from this requirement but then we would be doing the same operation multiple times within the bottleneck of the code.
-// //' Calculate Gradient
-// //'
-// //' @inheritParams mtlr_objVal
-// //' @export
-
-/*
-// [[Rcpp::export]]
- arma::rowvec mtlr_grad(NumericVector params, arma::mat yval, arma::mat featureValue, double C1, arma::vec delta) {
-  double N = featureValue.n_rows;
-  double P = featureValue.n_cols;
-  int m = yval.n_rows;
-  Range biasIdx(0,m-1);
-
-  NumericVector biasVec = params[biasIdx];
-  NumericMatrix thetaMatrix(m,P);
-  int thetaSize = thetaMatrix.nrow() * thetaMatrix.ncol();
-  for (int i = 0; i < thetaSize; i++) {
-    thetaMatrix[i] = params[m+i];
-  }
-
-  arma::mat thetas = as<arma::mat>(thetaMatrix);
-  arma::vec biases = as<arma::vec>(biasVec);
-  arma::vec BiasGradient = arma::zeros<arma::vec>(biases.n_elem);
-  arma::mat ThetaGradient = arma::zeros<arma::mat>(thetas.n_rows, thetas.n_cols);
-
-  arma::rowvec Xval(P, arma::fill::ones);
-  arma::mat  Numer(m,1,arma::fill::ones), ThetaSecond(m,P,arma::fill::ones), toAddWeight(m,P,arma::fill::ones);
-  arma::vec toAddBias(m,arma::fill::ones), val(m, arma::fill::ones),bigVal(m, arma::fill::ones),bigValCens(m, arma::fill::ones), BiasSecond(m,arma::fill::ones);
-  arma::uvec uncensoredIndex;
-  double Denom;
-
-  //Censored Piece
-  arma::vec BiasCens(m,arma::fill::ones);
-  arma::mat NumerCens(m,1,arma::fill::ones), ThetaCens(m,P,arma::fill::ones);
-  double DenomCens;
-  double NCens = sum(1-delta);
-  double biggestCensVal;
-  for(int i=0;i<NCens;i++){
-    Xval = featureValue.row(i);
-    val =  (thetas * Xval.t()) + biases;
-    bigVal  = reverse(cumsum(reverse(val)));
-
-    uncensoredIndex = find(yval.col(i) == 1);
-
-    if(uncensoredIndex.size() ==0){
-      bigValCens = bigVal % yval.col(i);
-      biggestCensVal = 0;
-    }else{
-      biggestCensVal  = bigVal.elem(uncensoredIndex).max() > 0 ? bigVal.elem(uncensoredIndex).max() : 0 ;
-
-      bigValCens = bigVal - biggestCensVal;
-      //we multiply firstPieceVal by ycol to 0 out the other large values in bigVal. Note while this will make exp(0) = 1, it will again be zeroed out by multiplying by y.col(i) again.
-      bigValCens %= yval.col(i);
-    }
-
-    NumerCens= cumsum(yval.col(i) % exp(bigValCens));
-    DenomCens = NumerCens[NumerCens.n_rows-1] + exp(-biggestCensVal);
-
-    BiasCens = NumerCens/DenomCens;
-
-    NumerCens *= Xval;
-
-    ThetaCens = NumerCens/DenomCens;
-
-    double biggestVal;
-    biggestVal = bigVal.max() > 0 ? bigVal.max() : 0;
-
-    bigVal -= biggestVal;
-
-    Numer= cumsum(exp(bigVal));
-    Denom = Numer[Numer.n_rows-1] +exp(-biggestVal);
-
-    BiasSecond = Numer/Denom;
-
-    Numer *= Xval;
-    ThetaSecond = Numer/Denom;
-
-    toAddBias =  BiasCens - BiasSecond;
-    toAddWeight =  ThetaCens - ThetaSecond;
-    BiasGradient -= toAddBias/N;
-
-    //Note we use += here since we later subtract from the regularization term.
-    ThetaGradient += toAddWeight/N;
-  }
-
-  //Uncensored Piece
-  for(int i=NCens;i<N;i++){
-    Xval = featureValue.row(i);
-    val =  (thetas * Xval.t()) + biases;
-
-    bigVal  = reverse(cumsum(reverse(val)));
-    double biggestVal;
-    biggestVal = bigVal.max() > 0 ? bigVal.max() : 0;
-    bigVal -= biggestVal;
-
-    Numer= cumsum(exp(bigVal));
-    Denom = Numer[Numer.n_rows-1] +exp(-biggestVal);
-    BiasSecond = Numer/Denom;
-
-    Numer *= Xval;
-    ThetaSecond = Numer/Denom;
-
-    toAddBias =  sum(yval.col(i) - BiasSecond.each_col(), 1);
-    toAddWeight =  yval.col(i) * Xval - ThetaSecond;
-    BiasGradient -= toAddBias/N;
-
-    //Note we use += here since we later subtract from the regularization term.
-    ThetaGradient += toAddWeight/N;
-  }
-
-  ThetaGradient = C1*thetas - ThetaGradient;
-  arma::vec ThetaFlat = vectorise(ThetaGradient);
-  return arma::join_cols<arma::mat>(BiasGradient, ThetaFlat).t();
-}
-*/
-
-//See mltr_objVal for argument definitions.
 // [[Rcpp::export]]
 arma::rowvec mtlr_grad(NumericVector params, arma::mat yval, arma::mat featureValue, double C1, arma::vec delta) {
   double N = featureValue.n_rows;
@@ -449,10 +257,7 @@ arma::rowvec mtlr_grad(NumericVector params, arma::mat yval, arma::mat featureVa
 
 
 //See mltr_objVal for argument definitions.
-// //' Predict survival curves.
-// //'
-// //'@inheritParams mtlr_objVal
-// //' @export
+//This is used for predicting survival curves given feature weights.
 // [[Rcpp::export]]
 arma::mat mtlr_predict(NumericVector params,arma::mat featureValue){
   double N = featureValue.n_rows;
