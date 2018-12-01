@@ -29,7 +29,7 @@ testthat::test_that("mtlr_cv function is consistent for all uncensored survival 
   expect_equal_to_reference(mtlr_cv(formula,data),"mtlrcv_uncensored.rds")
 })
 
-testthat::test_that("mtlr_cv function is consistent for all uncensored survival dataset",{
+testthat::test_that("mtlr_cv function catches negative C1 survival dataset",{
   formula = survival::Surv(time,status)~.
   data = survival::leukemia
   data = data[data$status == 1,]
@@ -38,6 +38,17 @@ testthat::test_that("mtlr_cv function is consistent for all uncensored survival 
 })
 
 
+testthat::test_that("mtlr_cv function works with multiple types of censoring",{
+  time1 = c(NA, 4, 7, 12, 10, 6, NA, 3,5,9,10,12,NA,4,6,2,NA,16,15,11)
+  time2 = c(14, 4, 10, 12, NA, 9, 5, NA, NA, NA, NA, 15,22,4,8,6,2,20,23,11)
+  set.seed(42)
+  dat = cbind.data.frame(time1, time2, importantfeature1 = rnorm(20),importantfeature2 = rnorm(20),
+                         importantfeature3 = rnorm(20),importantfeature4 = rnorm(20),importantfeature5 = rnorm(20),
+                         importantfeature6 = rbinom(20,1,.3),importantfeature7 = rbinom(20,1,.3))
+  formula = Surv(time1,time2,type = "interval2")~.
+  mixedmod = mtlr_cv(formula, dat)
+  expect_equal_to_reference(mixedmod,"mtlrcv_mixed_censoring.rds")
+})
 
 
 
