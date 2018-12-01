@@ -45,9 +45,8 @@ testthat::test_that("mtlr_cv function works with multiple types of censoring",{
   dat = cbind.data.frame(time1, time2, importantfeature1 = rnorm(20),importantfeature2 = rnorm(20),
                          importantfeature3 = rnorm(20),importantfeature4 = rnorm(20),importantfeature5 = rnorm(20),
                          importantfeature6 = rbinom(20,1,.3),importantfeature7 = rbinom(20,1,.3))
-  formula = Surv(time1,time2,type = "interval2")~.
-  mixedmod = mtlr_cv(formula, dat)
-  expect_equal_to_reference(mixedmod,"mtlrcv_mixed_censoring.rds")
+  formula = survival::Surv(time1,time2,type = "interval2")~.
+  expect_equal_to_reference(mtlr_cv(formula, dat),"mtlrcv_mixed_censoring.rds")
 })
 
 
