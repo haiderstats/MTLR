@@ -104,7 +104,10 @@ foldme <- function(time, delta, nfolds,foldtype = c("fullstrat","censorstrat","r
 
 loglik_loss <- function(object, newdata){
   #For the loss we need to compute losses differently for censored and uncensored patients.
-  #For censored patients the loss will correspond the the (log) survival probability assigned by the model at the time of censoring.
+  #For right censored patients the loss will correspond the the (log) survival probability assigned by the model at the time of censoring.
+  #For left censored patients the loss will correspond the the (log) death probability (1- survival) assigned by the model at the time of censoring.
+  #For interval censored patients the loss will correspond the the (log) probability assigned to the interval (probability of survival lower bound time -
+  #probability of survival upper bound time).
   #For uncensored patients, we will consider the log of the probability assigned to the time interval when the patient died.
   #Then we take the negative of this loss and thus would like to minimize the loss.
 
@@ -117,25 +120,64 @@ loglik_loss <- function(object, newdata){
   mf <- stats::model.frame(Terms, data=newdata,xlev=object$xlevels)
   response <- stats::model.response(mf)
 
+  type = attr(response,"type")
   event_times <- response[,1]
-  delta <- response[,2]
 
-  censor_ind <- which(!delta)
-  uncen_ind <- which(!!delta)
+  if(type %in% c("interval","interval2")){
+    event_times2 = response[,2]
+    delta <- response[,3] #Death indicator (right censored = 0, death = 1, left censored = 2, interval censored = 3)
+  }else{
+    delta <- response[,2] #Death indicator (right censored = 0, death = 1, left censored = 2, interval censored = 3)
+  }
+
+  censor_ind <- which(delta!=1)
+  uncen_ind <- which(delta==1)
 
   #Initialize loss to 0.
   logloss <- 0
 
   #Censored patients
   if(length(censor_ind)){
-    censor_prob <- sapply(censor_ind,
-                          function(index) predict_prob(curves[,index+1],
-                                                       curves[,1],
-                                                       event_times[index]
-                          ))
-    #Currently we add a value of 0.00001 to all values since otherwise we might take the log of 0.
-    #This is clearly not ideal but shouldn't make a large impact especially since this is only used for selecting C1.
-    logloss <- logloss - sum(log(censor_prob + 1e-05))
+    if(type == "right" | type == "left"){
+      censor_prob <- sapply(censor_ind,
+                            function(index) predict_prob(curves[,index+1],
+                                                         curves[,1],
+                                                         event_times[index]
+                            ))
+      #Currently we add a value of 0.00001 to all values since otherwise we might take the log of 0.
+      #This is clearly not ideal but shouldn't make a large impact especially since this is only used for selecting C1.
+      if(type == "right"){
+        #For right censor we have a loss of the probability of surviving to censor time, log(1) is optimal, log (0) is worst case.
+        logloss <- logloss - sum(log(censor_prob + 1e-05))
+      }else{
+        #For left censor we have a loss of the probability of dying before censor time, log(1) is optimal, log (0) is worst case.
+        logloss <- logloss - sum(log(1-censor_prob + 1e-05))
+      }
+    }else{
+      left_right = which(delta %in% c(0,2))
+      interval = which(delta %in% c(3))
+      left_right_prob = sapply(left_right,
+                               function(index) predict_prob(curves[,index+1],
+                                                            curves[,1],
+                                                            event_times[index]
+                               ))
+      interval_probL = sapply(interval,
+                              function(index) predict_prob(curves[,index+1],
+                                                           curves[,1],
+                                                           event_times[index]
+                              ))
+      interval_probU = sapply(interval,
+                              function(index) predict_prob(curves[,index+1],
+                                                           curves[,1],
+                                                           event_times2[index]
+                              ))
+
+      left_right_prob = ifelse(left_right %in% which(delta==0), left_right_prob, 1 - left_right_prob)
+      interval_prob = interval_probL - interval_probU
+      censor_prob = c(left_right_prob, interval_prob)
+      logloss <- logloss - sum(log(censor_prob + 1e-05))
+    }
+
   }
 
   #Uncensored patients
@@ -148,7 +190,7 @@ loglik_loss <- function(object, newdata){
     #This will find the index of which interval the event occured we then index pmf_probs the by observation index
     #and the event index to generate the vector of probabilities assigend to each observations respective event time.
     event_ind <- sapply(event_times[uncen_ind], function(x) findInterval(x, curves[,1]))
-    index_col <- 1:sum(delta)
+    index_col <- 1:length(uncen_ind)
     index_mat <- matrix(c(event_ind,index_col),ncol = 2)
     probs <- pmf_probs[index_mat]
     logloss <- logloss  - sum(log(probs+1e-05))
