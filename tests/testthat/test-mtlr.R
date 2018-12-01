@@ -47,12 +47,6 @@ testthat::test_that("mtlr function is consistent for basic survival dataset for 
   expect_equal_to_reference(mtlr(formula,data, nintervals = 3),"mtlr_leuk_timepoints.rds")
 })
 
-testthat::test_that("mtlr function is consistent for basic survival dataset for chosen timepoints",{
-  formula = survival::Surv(time,status)~.
-  data = survival::leukemia
-  expect_equal_to_reference(mtlr(formula,data, time_points = seq(0,55, length.out = 100)),"mtlr_leuk_spectimepoints.rds")
-})
-
 testthat::test_that("mtlr function works with left censoring",{
   formula = survival::Surv(time,status, type = "left")~.
   data = survival::lung
@@ -67,7 +61,7 @@ testthat::test_that("mtlr function works with multiple types of censoring",{
                          importantfeature3 = rnorm(20),importantfeature4 = rnorm(20),importantfeature5 = rnorm(20),
                          importantfeature6 = rbinom(20,1,.3),importantfeature7 = rbinom(20,1,.3))
   formula = survival::Surv(time1,time2,type = "interval2")~.
-  expect_equal_to_reference(mtlr(formula, dat, time_points = seq(0,23,length.out = 100)),"mtlr_mixed_censoring.rds")
+  expect_equal_to_reference(mtlr(formula, dat),"mtlr_mixed_censoring.rds", tolerance = 1e-3)
 })
 
 

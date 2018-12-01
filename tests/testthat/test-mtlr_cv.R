@@ -12,14 +12,14 @@ testthat::test_that("mtlr_cv function is consistent for basic survival dataset",
 testthat::test_that("mtlr_cv function is consistent for more complex survival dataset",{
   formula = survival::Surv(time,status)~.
   data = survival::lung
-  expect_equal_to_reference(mtlr_cv(formula,data),"mtlrcv_lung.rds")
+  expect_equal_to_reference(mtlr_cv(formula,data),"mtlrcv_lung.rds", tolerance = 1e-3)
 })
 
 testthat::test_that("mtlr_cv function is consistent for all censored survival dataset",{
   formula = survival::Surv(time,status)~.
   data = survival::lung
   data = data[data$status == 1,]
-  expect_equal_to_reference(mtlr_cv(formula,data),"mtlrcv_censored.rds")
+  expect_equal_to_reference(mtlr_cv(formula,data),"mtlrcv_censored.rds", tolerance = 1e-3)
 })
 
 testthat::test_that("mtlr_cv function is consistent for all uncensored survival dataset",{
@@ -46,7 +46,7 @@ testthat::test_that("mtlr_cv function works with multiple types of censoring",{
                          importantfeature3 = rnorm(20),importantfeature4 = rnorm(20),importantfeature5 = rnorm(20),
                          importantfeature6 = rbinom(20,1,.3),importantfeature7 = rbinom(20,1,.3))
   formula = survival::Surv(time1,time2,type = "interval2")~.
-  expect_equal_to_reference(mtlr_cv(formula, dat),"mtlrcv_mixed_censoring.rds")
+  expect_equal_to_reference(mtlr_cv(formula, dat),"mtlrcv_mixed_censoring.rds",tolerance = 1e-3)
 })
 
 
