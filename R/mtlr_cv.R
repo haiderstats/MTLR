@@ -43,8 +43,8 @@ mtlr_cv <- function(formula,
                  foldtype = c("fullstrat","censorstrat","random"),
                  threshold = 1e-05,
                  maxit = 5000,
-                 lower = -20,
-                 upper = 20){
+                 lower = -15,
+                 upper = 15){
   if(any(C1_vec < 0)){
     stop("All values of C1 must be non-negative.")
   }
@@ -56,8 +56,10 @@ mtlr_cv <- function(formula,
   time <- y[,1]
   delta <- y[,2]
   fold_index <- foldme(time,delta,nfolds,foldtype)
-
-  data <- data[stats::complete.cases(data),]
+  time_delta_names = attr(y,"dimnames")[[2]]
+  #There may be some NAs in the time if we are in the inteval setting. We do not want to remove these rows since they
+  #are valid NAs. However, we only want x values with nonmissing data.
+  data <- data[stats::complete.cases(data[which(!names(data)%in%time_delta_names)]),]
   res_mat <- matrix(rep(0,nfolds*length(C1_vec)), ncol = length(C1_vec),nrow =nfolds)
   for(fold in 1:nfolds){
     datacv <- data[-fold_index[[fold]],]

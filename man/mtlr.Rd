@@ -6,7 +6,7 @@
 \usage{
 mtlr(formula, data, time_points = NULL, nintervals = NULL,
   normalize = T, C1 = 1, train_biases = T, threshold = 1e-05,
-  maxit = 5000, lower = -20, upper = 20)
+  maxit = 5000, lower = -15, upper = 15)
 }
 \arguments{
 \item{formula}{a formula object with the response to the left of the "~" operator. The response must be a survival object returned
@@ -75,6 +75,10 @@ package will add more options to address this non-convexity.
 Yu et al. (2011) actually suggested two regularization parameters, C1 to control the size of the feature weights and C2 to control the smoothness.
 In Ping Jin's masters thesis (Using Survival Prediction Techniques to Learn Consumer-Specific Reservation Price Distributions) he showed that C2
 is not required for smoothness and C1 will suffice (Appendix A.2) so we do not support the C2 parameter in this implemenetation.
+
+If an error occurs from optim it is likely the weights are getting too large. Including fewer time points (or specifying better time points) in
+addition to changing the lower/upper bounds of L-BFGS-B may resolve these issues. The most common failure has been that the objective value sees
+infinite values due to extremely large feature weights.
 
 \strong{Censored data:} Right, left, and interval censored data are all supported both seperately and mixed. The convention to input these types of
 data follows the \link[survival]{Surv} object format.
