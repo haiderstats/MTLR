@@ -13,7 +13,7 @@ matrix:
       env: R_CODECOV=true
     - os: osx
       osx_image: xcode10.1
-    -os: osx
+    - os: osx
       osx_image: beta-xcode6.1
       disable_homebrew: true
 
