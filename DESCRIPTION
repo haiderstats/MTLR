@@ -12,7 +12,7 @@ Encoding: UTF-8
 LazyData: true
 Imports:
     Rcpp (>= 0.12.18),
-    survival (>= 2.42)
+    survival (>= 2.4.0)
 Suggests:
     ggplot2 (>= 3.0.0),
     reshape2 (>= 1.4.3),
