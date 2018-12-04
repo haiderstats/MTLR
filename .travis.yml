@@ -5,21 +5,21 @@ r:
   - oldrel
   - release
   - devel
+
+os:
+  - linux
+  - osx
+
 sudo: false
 cache: packages
 
 matrix:
-  include:
-    - os: linux
-      env: R_CODECOV=true
-    - os: osx
-      osx_image: xcode10.1
-    - os: osx
-      osx_image: beta-xcode6.1
-      disable_homebrew: true
+  exclude:
+  - os: osx
+    r: devel
 
 r_packages:
   - covr
 
 after_success:
-  - if [[ "${R_CODECOV}" ]]; then R -e 'covr::codecov()'; fi
+  - Rscript -e 'covr::codecov()'
