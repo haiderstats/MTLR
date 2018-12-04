@@ -15,13 +15,18 @@ knitr::opts_chunk$set(
 [![Build Status](https://travis-ci.org/haiderstats/MTLR.svg?branch=master)](https://travis-ci.org/haiderstats/MTLR)
 [![codecov](https://codecov.io/gh/haiderstats/MTLR/branch/master/graphs/badge.svg)](https://codecov.io/gh/haiderstats/MTLR) 
 
-The goal of MTLR is to ...
+The goal of `MTLR` is to provide an R implementation for [Multi-Task Logistic Regression](https://papers.nips.cc/paper/4210-learning-patient-specific-cancer-survival-distributions-as-a-sequence-of-dependent-regressors). In addition to supplying the model provided by [Yu et al.](https://papers.nips.cc/paper/4210-learning-patient-specific-cancer-survival-distributions-as-a-sequence-of-dependent-regressors) we have extended the model for left censoring, interval censoring, and a mixture of censoring types. Functionality includes training an MTLR model, predicting survival curves for new observations, and plotting these survival curves and feature weights estimated by MTLR.
 
 ## Installation
 
-You can install MTLR from github with:
+You can install the version from CRAN or the development version from GitHub:
 
-```{r gh-installation, eval = FALSE}
+```{r, eval = FALSE}
+# CRAN:
+install.packages("MTLR")
+
+# GitHub:
+
 # install.packages("devtools")
 devtools::install_github("haiderstats/MTLR")
 ```
