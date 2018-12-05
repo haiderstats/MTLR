@@ -1,6 +1,6 @@
 Package: MTLR
 Type: Package
-Title: Survival Prediction with Mutli-Task Logistic Regression
+Title: Survival Prediction with Multi-Task Logistic Regression
 Version: 0.1.0
 Author: Humza Haider
 Maintainer: Humza Haider <hshaider@ualberta.ca>
