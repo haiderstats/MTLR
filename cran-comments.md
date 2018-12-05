@@ -13,10 +13,10 @@ There was 1 NOTE:
 * New Submission
 
 * Possibly mis-spelled words in DESCRIPTION:
-  MTLR (9:67, 10:78)
-  Yu (10:46)
-  al (10:52)
-  et (10:49)
+  MTLR (9:67, 10:83)
+  Yu (10:51)
+  al (10:57)
+  et (10:54)
 
   These words here are either abbreviations (MTLR) or references to the authors (Yu et al.) of the paper that the method in this package is based on. 
 
