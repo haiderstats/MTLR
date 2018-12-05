@@ -56,7 +56,9 @@ print(mod)
 plot(mod)
 ```
 
-<img align = "center" src="README-unnamed-chunk-4-1.png" style="display: block; margin: auto;" />
+<p align = "center">
+<img src="README-unnamed-chunk-4-1.png" style="display: block; margin: auto;" />
+</p>
 
 ``` r
 #Get survival curves for the lung dataset:
@@ -65,4 +67,6 @@ curves <- predict(mod)
 plotcurves(curves, 1:20)
 ```
 
+<p align = "center">
 <img align = "center" src="README-unnamed-chunk-4-2.png" style="display: block; margin: auto;" />
+</p>
