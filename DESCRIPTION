@@ -9,7 +9,7 @@ BugReports: https://github.com/haiderstats/MTLR/issues
 Description: An implementation of Multi-Task Logistic Regression (MTLR) for R. 
   This package is based on the NIPS paper by Yu et al. (2011) which proposed MTLR for generating individual survival curves
   by learning feature weights which vary across time. This model was further extended to account for left and interval censored data.
-License: GPL
+License: GPL-2 | file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports:
