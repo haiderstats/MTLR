@@ -11,8 +11,8 @@ options(width = 100)
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.path = "README-"
-)
+  fig.path = "man/figures/README-"
+  )
 ```
 
 # MTLR
@@ -43,7 +43,8 @@ Given a survival dataset containing event time and event status indicator (censo
 library(MTLR)
 ```
 
-```{r, fig.align='center'}
+
+```{r example, fig.align='center'}
 # Load survival for the lung dataset and the Surv() function.
 library(survival)
 #Here we will use 9 intervals (10 time points) just for plotting purposes. 
@@ -57,3 +58,6 @@ curves <- predict(mod)
 #Plot the first 20 survival curves:
 plotcurves(curves, 1:20)
 ```
+
+
+
