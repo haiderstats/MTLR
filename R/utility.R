@@ -79,29 +79,6 @@ predict_median <- function(survival_curve, predicted_times){
   return(medianProbabilityTime)
 }
 
-foldme <- function(time, delta, nfolds,foldtype = c("fullstrat","censorstrat","random")){
-  if(nfolds < 1)
-    stop("Number of folds must be greater than 0.")
-  type <- match.arg(foldtype)
-  foldIndex <- switch(type,
-                     fullstrat = {
-                       Order<- order(delta,time)
-                       lapply(1:nfolds, function(x) Order[seq(x,length(time), by = nfolds)])
-                     },
-                     censorstrat = {
-                       censored <- sample(which(!delta))
-                       uncensored <- sample(which(!!delta))
-                       Order<- c(censored,uncensored)
-                       lapply(1:nfolds, function(x) Order[seq(x,length(time), by = nfolds)])
-                     },
-                     random = {
-                       Order <- sample(length(time))
-                       lapply(1:nfolds, function(x) Order[seq(x,length(time), by = nfolds)])
-                     }
-  )
-  return(foldIndex)
-}
-
 loglik_loss <- function(object, newdata){
   #For the loss we need to compute losses differently for censored and uncensored patients.
   #For right censored patients the loss will correspond the the (log) survival probability assigned by the model at the time of censoring.
