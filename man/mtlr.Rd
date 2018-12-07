@@ -5,8 +5,8 @@
 \title{Train a Mutli-Task Logistic Regression (MTLR) Model}
 \usage{
 mtlr(formula, data, time_points = NULL, nintervals = NULL,
-  normalize = T, C1 = 1, train_biases = T, threshold = 1e-05,
-  maxit = 5000, lower = -15, upper = 15)
+  normalize = T, C1 = 1, train_biases = T, seed_weights = NULL,
+  threshold = 1e-05, maxit = 5000, lower = -15, upper = 15)
 }
 \arguments{
 \item{formula}{a formula object with the response to the left of the "~" operator. The response must be a survival object returned
@@ -30,6 +30,10 @@ Regressors" by Yu et al. (2011) for details.}
 
 \item{train_biases}{if TRUE, biases will be trained before feature weights (and again trained while training feature weights). This
 has shown to speed up total training time.}
+
+\item{seed_weights}{the initialization weights for the biases and the features. If left as NULL all weights are initialized to zero. If seed_weights are
+specified then either nintervals or time_points must also be specified. The length of seed_weights should correspond to (number of features + 1)*(length of
+time_points) = (number of features + 1)*(nintervals + 1).}
 
 \item{threshold}{The threshold for the convergence tolerance (in the objective function) when training the feature weights.
 This threshold will be passed to \link[stats]{optim}.}

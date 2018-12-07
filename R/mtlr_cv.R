@@ -3,6 +3,9 @@
 #' @inheritParams mtlr
 #' @param C1_vec a vector of regularization parameters to test. All values must be non-negative. For large datasets you may want to reduce the number
 #' of value tried to increase efficiency. Similarly for nfolds.
+#' @param previous_weights a boolean specifying if sequential folds should use the previous fold's parameters as seed_weights. Doing this will likely
+#' speed up the computation time for cross-validation as we are providing weights which are (likely) close to the optimal weights. Note that this is
+#' done seperately for each value of C1 so there is no parameter sharing between different values of C1, and instead only across the same value of C1.
 #' @param loss a string indicating the loss to optimize for which to choose the regularization parameter. Currently only the log-likelihood (ll)
 #'  is supported.
 #' @param nfolds the number of internal cross validation folds, default is 5.
@@ -12,6 +15,7 @@
 #' Censored stratification, "censorstrat", will put approximately the same number of uncensored observations in each fold but not pay any attention to
 #' event time. This is partially stochastic. The totally random cross-validation, "random", randomly assigns observations to folds without considering
 #' event time nor event status.
+#' @param verbose if TRUE the progress will be printed for every completed value of C1.
 #' @details Currently only the log-likelihood loss is supported for optimizing C1. Here the loss considers censored and uncensored observations differently.
 #' For uncensored observations, we assign a loss of the negative log probability assigned to the interval in which the observation had their event, \emph{e.g.}
 #' if an observation had a 20% chance of having its event between timepoint1 and timepoint2 and it did have it's event in that interval then the loss
@@ -38,9 +42,12 @@ mtlr_cv <- function(formula,
                  normalize = T,
                  C1_vec = c(0.001,0.01,0.1,1,10,100,1000),
                  train_biases = T,
+                 seed_weights = NULL,
+                 previous_weights = T,
                  loss = c("ll"),
                  nfolds = 5,
                  foldtype = c("fullstrat","censorstrat","random"),
+                 verbose = FALSE,
                  threshold = 1e-05,
                  maxit = 5000,
                  lower = -15,
@@ -61,11 +68,33 @@ mtlr_cv <- function(formula,
   #are valid NAs. However, we only want x values with nonmissing data.
   data <- data[stats::complete.cases(data[which(!names(data)%in%time_delta_names)]),]
   res_mat <- matrix(rep(0,nfolds*length(C1_vec)), ncol = length(C1_vec),nrow =nfolds)
+  #Give the same number of intervals to every fold.
+  if(is.null(time_points) & is.null(nintervals)){
+    nintervals <- ceiling(sqrt(((nfolds-1)/nfolds)*nrow(y))) #Default number of intervals is the sq. root of the number of observations in k-1/k % of the data.
+  }
+  if(previous_weights){
+    parList = list()
+  }
   for(fold in 1:nfolds){
     datacv <- data[-fold_index[[fold]],]
     result <- c()
-    for(i in C1_vec){
-      mod <- mtlr(formula, datacv,time_points,nintervals,normalize,i, train_biases, threshold, maxit, lower, upper)
+    for(i in seq_along(C1_vec)){
+      if(previous_weights){
+        if(fold == 1){
+          mod <- mtlr(formula,datacv,time_points,nintervals,
+                      normalize, C1_vec[i], train_biases, seed_weights,
+                      threshold, maxit, lower, upper)
+          parList[[i]] = c(mod$weight_matrix)
+        }else{
+          mod <- mtlr(formula,datacv,time_points,nintervals,
+                      normalize, C1_vec[i], train_biases, parList[[i]],
+                      threshold, maxit, lower, upper)
+        }
+      }else{
+        mod <- mtlr(formula,datacv,time_points,nintervals,
+                    normalize, C1_vec[i], train_biases, seed_weights,
+                    threshold, maxit, lower, upper)
+      }
       result <- c(result, loglik_loss(mod,data[fold_index[[fold]],]))
     }
     res_mat[fold,] <- result

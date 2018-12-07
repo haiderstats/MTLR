@@ -21,6 +21,9 @@ NULL
 #'  Regressors" by Yu et al. (2011) for details.
 #' @param train_biases if TRUE, biases will be trained before feature weights (and again trained while training feature weights). This
 #' has shown to speed up total training time.
+#' @param seed_weights the initialization weights for the biases and the features. If left as NULL all weights are initialized to zero. If seed_weights are
+#' specified then either nintervals or time_points must also be specified. The length of seed_weights should correspond to (number of features + 1)*(length of
+#' time_points) = (number of features + 1)*(nintervals + 1).
 #' @param threshold The threshold for the convergence tolerance (in the objective function) when training the feature weights.
 #'  This threshold will be passed to \link[stats]{optim}.
 #' @param maxit The maximum iterations to run for MTLR. This parameter will be passed to \link[stats]{optim}.
@@ -99,6 +102,7 @@ mtlr <- function(formula,
                  normalize = T,
                  C1 = 1,
                  train_biases = T,
+                 seed_weights = NULL,
                  threshold = 1e-05,
                  maxit = 5000,
                  lower = -15,
@@ -133,7 +137,18 @@ mtlr <- function(formula,
     stop("C1 must be non-negative.")
   if(threshold <= 0)
     stop("The threshold must be positive.")
-
+  #Extra checks for when seed_weights is not NULL.
+  if(!is.null(seed_weights)){
+    if(is.null(time_points) & is.null(nintervals))
+      stop("When using 'seed_weights' one of 'time_points' or 'nintervals' must also be specified")
+    if(!is.null(time_points)){
+      if(length(seed_weights) != (ncol(x)+1)*length(time_points))
+        stop("The length of seed_weights must equal the product of the (number of features + 1) and the length of time_points.")
+    }
+    else if(!is.null(nintervals))
+      if(length(seed_weights) != (ncol(x)+1)*(nintervals +1))
+        stop("The length of seed_weights must equal the product of the (number of features + 1) and (nintervals + 1)")
+  }
   if(is.null(nintervals) & is.null(time_points))
     nintervals <- ceiling(sqrt(nrow(y))) #Default number of intervals is the sq. root of the number of observations.
   if(normalize){
@@ -200,28 +215,33 @@ mtlr <- function(formula,
   #train the data with their true censor statuses.
   threshold_factor <- threshold/.Machine$double.eps
   censInd = ifelse(delta <1,0,1)
+  if(is.null(seed_weights)){
+    if(train_biases){
+      zero_matrix <- matrix(0,ncol = ncol(x), nrow = nrow(x))   #We create a zero_matrix to train the biases
 
-  if(train_biases){
-    zero_matrix <- matrix(0,ncol = ncol(x), nrow = nrow(x))   #We create a zero_matrix to train the biases
+      bias_par <- stats::optim(par = rep(0,length(time_points)*(ncol(x) +1)),fn = mtlr_objVal,gr = mtlr_grad, yval = y_matrix,
+                               featureVal = zero_matrix, C1=C1, delta = sort(censInd),
+                               method = "L-BFGS-B", lower = lower, upper = upper, control = c(maxit = maxit, factr = threshold_factor))
+      if(bias_par$convergence == 52)
+        stop(paste("Error occured while training MTLR. Optim Error: ", bias_par$message))
+    }else{
+      bias_par <- list(par = rep(0,length(time_points)*(ncol(x) +1)))
+    }
 
-    bias_par <- stats::optim(par = rep(0,length(time_points)*(ncol(x) +1)),fn = mtlr_objVal,gr = mtlr_grad, yval = y_matrix,
-                             featureVal = zero_matrix, C1=C1, delta = sort(censInd),
-                             method = "L-BFGS-B", lower = lower, upper = upper, control = c(maxit = maxit, factr = threshold_factor))
-    if(bias_par$convergence == 52)
-      stop(paste("Error occured while training MTLR. Optim Error: ", bias_par$message))
-  }else{
-    bias_par <- list(par = rep(0,length(time_points)*(ncol(x) +1)))
+    params_uncensored <- stats::optim(par = bias_par$par,fn = mtlr_objVal, gr = mtlr_grad, yval = y_matrix, featureVal = x, C1 = C1, delta = rep(1,nrow(x)),
+                                      method = "L-BFGS-B", lower = lower, upper = upper, control = c(maxit = maxit, factr = threshold_factor))
+    if(params_uncensored$convergence == 52)
+      stop(paste("Error occured while training MTLR. Optim Error: ", params_uncensored$message))
+
+    final_params <- stats::optim(par = params_uncensored$par,fn = mtlr_objVal,gr = mtlr_grad, yval = y_matrix, featureVal = x, C1 = C1,delta = sort(censInd),
+                                 method = "L-BFGS-B", lower = lower, upper = upper, control = c(maxit = maxit, factr = threshold_factor))
+    if(final_params$convergence == 52)
+      stop(paste("Error occured while training MTLR. Optim Error: ", final_params$message))
+  } else{
+    final_params <- stats::optim(par = seed_weights,fn = mtlr_objVal,gr = mtlr_grad, yval = y_matrix, featureVal = x, C1 = C1,delta = sort(censInd),
+                                 method = "L-BFGS-B", lower = lower, upper = upper, control = c(maxit = maxit, factr = threshold_factor))
   }
 
-  params_uncensored <- stats::optim(par = bias_par$par,fn = mtlr_objVal, gr = mtlr_grad, yval = y_matrix, featureVal = x, C1 = C1, delta = rep(1,nrow(x)),
-                                    method = "L-BFGS-B", lower = lower, upper = upper, control = c(maxit = maxit, factr = threshold_factor))
-  if(params_uncensored$convergence == 52)
-    stop(paste("Error occured while training MTLR. Optim Error: ", params_uncensored$message))
-
-  final_params <- stats::optim(par = params_uncensored$par,fn = mtlr_objVal,gr = mtlr_grad, yval = y_matrix, featureVal = x, C1 = C1,delta = sort(censInd),
-                               method = "L-BFGS-B", lower = lower, upper = upper, control = c(maxit = maxit, factr = threshold_factor))
-  if(final_params$convergence == 52)
-    stop(paste("Error occured while training MTLR. Optim Error: ", final_params$message))
 
   weights <- matrix(final_params$par, ncol = ncol(x) + 1,byrow=FALSE)
   colnames(weights) <- c("Bias",colnames(x))
