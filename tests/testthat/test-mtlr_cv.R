@@ -46,7 +46,7 @@ testthat::test_that("mtlr_cv function works with multiple types of censoring",{
                          importantfeature3 = rnorm(20),importantfeature4 = rnorm(20),importantfeature5 = rnorm(20),
                          importantfeature6 = rbinom(20,1,.3),importantfeature7 = rbinom(20,1,.3))
   formula = survival::Surv(time1,time2,type = "interval2")~.
-  expect_equal_to_reference(mtlr_cv(formula, dat, C1_vec = c(.001,.01,.1,0)),"mtlrcv_mixed_censoring.rds",tolerance = 1e-2)
+  expect_equal_to_reference(mtlr_cv(formula, dat, C1_vec = c(.001,.01,.1,0), previous_weights=F ),"mtlrcv_mixed_censoring.rds",tolerance = 1e-2)
 })
 
 
