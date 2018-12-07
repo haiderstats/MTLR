@@ -11,7 +11,7 @@ plotcurves(curves, index = 1, color = c(), xlim = c(),
 \item{curves}{survival curves formatted the same as those from predict.mtlr. Time points must be in the first column of the matrix followed by
 columns representing survival probabilities for each observation.}
 
-\item{index}{the index of the observation to plot. Here an index of 1 will refer to the second column of the curves object. If over 15 indicies are
+\item{index}{the index of the observation to plot. Here an index of 1 will refer to the second column of the curves object. If over 15 indices are
 given the legend will be removed as to not take up plotting space. To avoid this behavior set remove_legend = FALSE.}
 
 \item{color}{the color of the plotted survival curve. The length of color must match the length of index.}
@@ -23,7 +23,7 @@ legend may take up lots of space.}
 }
 \description{
 Plot the survival curves returned from predict.mtlr. Users must have packages ggplot2 and reshape2 installed in order to use this function.
-Survival curves for MTLR are smoothed using a monotonic cubic spline using a Hyman filtering between timepoints. For details regarding this
+Survival curves for MTLR are smoothed using a monotonic cubic spline using a Hyman filtering between time points. For details regarding this
 smoothing function see \code{\link[stats]{splinefun}}.
 }
 \examples{

@@ -18,7 +18,7 @@ by the \code{\link[survival]{Surv}} function.}
 
 \item{time_points}{the time points for MTLR to create weights. If left as NULL, the time_points chosen will be based on equally spaced quantiles
 of the survival times. In the case of interval censored data note that only the start time is considered and not the end time for selecting time points.
-It is strongly reccommended to specify time points if your data is heavily interval censored. If time_points is not NULL then nintervals is ignored.}
+It is strongly recommended to specify time points if your data is heavily interval censored. If time_points is not NULL then nintervals is ignored.}
 
 \item{nintervals}{Number of time intervals to use for MTLR. Note the number of time points will be nintervals + 1. If left as NULL
 a default of sqrt(N) is used where N is the number of observations in the supplied dataset. This parameter is ignored if time_points is specified.}
@@ -40,14 +40,15 @@ is supported.}
 
 \item{foldtype}{type of cross validation folds. Full stratification, "fullstrat", sorts observations by their event time and their event indicators
 and numbers them off into folds. This effectively give each fold approximately the same number of uncensored observations as well as keeps the range
-of time points as equivalent as possible across folds. This type of cross-validation is completely determininstic.
+of time points as equivalent as possible across folds. This type of cross-validation is completely deterministic.
 Censored stratification, "censorstrat", will put approximately the same number of uncensored observations in each fold but not pay any attention to
 event time. This is partially stochastic. The totally random cross-validation, "random", randomly assigns observations to folds without considering
 event time nor event status.}
 
-\item{threshold}{The threshold for training the weights. This threshold will be passed to \link[stats]{optim}.}
+\item{threshold}{The threshold for the convergence tolerance (in the objective function) when training the feature weights.
+This threshold will be passed to \link[stats]{optim}.}
 
-\item{maxit}{The maximum interations to run for MTLR. This parameter will be passed to \link[stats]{optim}.}
+\item{maxit}{The maximum iterations to run for MTLR. This parameter will be passed to \link[stats]{optim}.}
 
 \item{lower}{The lower bound for L-BFGS-B optimization. This parameter will be passed to \link[stats]{optim}.}
 

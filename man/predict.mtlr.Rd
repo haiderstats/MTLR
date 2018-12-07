@@ -13,7 +13,7 @@
 \item{newdata}{an optional new dataframe for which to perform predictions using MTLR. If left empty, predictions will
 be performed using the dataset used to generate the original mtlr object.}
 
-\item{type}{the type of prediciton desired. Options are the survival curve "survivalcurve", the probability of survival at the
+\item{type}{the type of prediction desired. Options are the survival curve "survivalcurve", the probability of survival at the
 observations event time "prob_event", the mean survival time "mean_time", and the median survival time, "median_time".
 For "survivalcurve", the first column of the matrix returned will correspond to the time points and all other columns will be
 the observations survival probability at those associated time points. The index of a (row) observation in newdata will correspond
@@ -21,7 +21,7 @@ to the \emph{ith + 1} column of the returned matrix.
 If "prob_event" is chosen the response (event time) is required. For "mean_time", if survival curves do not extend to zero survival
 probability a linear extension is added (a linear line from (time = 0,probability = 1) to (time = ?, probability =0)). This is the
 same for "median_time" except the line need only extend to survival probability = 0.5.
-A mean/median survival time of Inf is returned for survial curves with all survival probabilities of 1.}
+A mean/median survival time of Inf is returned for survival curves with all survival probabilities of 1.}
 
 \item{add_zero}{if TRUE, a time point of "0" and a survival probability of "1" will be added to all survival curves. Additionally,
 if add_zero is TRUE, type = "mean_time" will represent the average survival time overall but if FALSE, then "mean_time" will be reduced

@@ -11,7 +11,7 @@ NULL
 #' @param data a data.frame containing the features for survival prediction. These must be variables corresponding to the formula object.
 #' @param time_points the time points for MTLR to create weights. If left as NULL, the time_points chosen will be based on equally spaced quantiles
 #' of the survival times. In the case of interval censored data note that only the start time is considered and not the end time for selecting time points.
-#' It is strongly reccommended to specify time points if your data is heavily interval censored. If time_points is not NULL then nintervals is ignored.
+#' It is strongly recommended to specify time points if your data is heavily interval censored. If time_points is not NULL then nintervals is ignored.
 #' @param nintervals Number of time intervals to use for MTLR. Note the number of time points will be nintervals + 1. If left as NULL
 #' a default of sqrt(N) is used where N is the number of observations in the supplied dataset. This parameter is ignored if time_points is specified.
 #' @param normalize if TRUE, variables will be normalized (mean 0, standard deviation of 1). This is STRONGLY suggested. If normalization
@@ -21,30 +21,31 @@ NULL
 #'  Regressors" by Yu et al. (2011) for details.
 #' @param train_biases if TRUE, biases will be trained before feature weights (and again trained while training feature weights). This
 #' has shown to speed up total training time.
-#' @param threshold The threshold for training the weights. This threshold will be passed to \link[stats]{optim}.
-#' @param maxit The maximum interations to run for MTLR. This parameter will be passed to \link[stats]{optim}.
+#' @param threshold The threshold for the convergence tolerance (in the objective function) when training the feature weights.
+#'  This threshold will be passed to \link[stats]{optim}.
+#' @param maxit The maximum iterations to run for MTLR. This parameter will be passed to \link[stats]{optim}.
 #' @param lower The lower bound for L-BFGS-B optimization. This parameter will be passed to \link[stats]{optim}.
 #' @param upper The upper bound for L-BFGS-B optimization. This parameter will be passed to \link[stats]{optim}.
 #' @details This function allows one to train an MTLR model given a dataset containing survival data. mtlr uses the Limited-Memory
 #' Broyden–Fletcher–Goldfarb–Shanno (L-BFGS-B) approximation method to train feature weights. This training is outsourced to the internal
 #' \link[stats]{optim} function in R. Currently only a few parameters (namely threshold, maxit,lower, upper) of optim are supported, more will
-#' likely become avaliable in the future.
+#' likely become available in the future.
 #'
 #' Weights are initialized to 0 prior to training. Under default settings, the bias weights
 #' will be trained before considering feature weights. As Yu et al. (2011) specified, the introduction of censored observations creates a non-convex
-#' loss function. To address this, weights are first trained assuming all patietns event times are \emph{uncensored}. Once these starting weights have
+#' loss function. To address this, weights are first trained assuming all event times are \emph{uncensored}. Once these starting weights have
 #' been trained another round of training is performed using the true values of the event indicator (censored/uncensored). Future iterations of this
 #' package will add more options to address this non-convexity.
 #'
 #' Yu et al. (2011) actually suggested two regularization parameters, C1 to control the size of the feature weights and C2 to control the smoothness.
 #' In Ping Jin's masters thesis (Using Survival Prediction Techniques to Learn Consumer-Specific Reservation Price Distributions) he showed that C2
-#' is not required for smoothness and C1 will suffice (Appendix A.2) so we do not support the C2 parameter in this implemenetation.
+#' is not required for smoothness and C1 will suffice (Appendix A.2) so we do not support the C2 parameter in this implementation.
 #'
 #' If an error occurs from optim it is likely the weights are getting too large. Including fewer time points (or specifying better time points) in
 #' addition to changing the lower/upper bounds of L-BFGS-B may resolve these issues. The most common failure has been that the objective value sees
 #' infinite values due to extremely large feature weights.
 #'
-#'\strong{Censored data:} Right, left, and interval censored data are all supported both seperately and mixed. The convention to input these types of
+#'\strong{Censored data:} Right, left, and interval censored data are all supported both separately and mixed. The convention to input these types of
 #'data follows the \link[survival]{Surv} object format.
 #'Per the Surv documentation, "The [interval2] approach is to think of each observation as a time interval with (-infinity, t) for left censored,
 #'(t, infinity) for right censored, (t,t) for exact and (t1, t2) for an interval. This is the approach used for type = interval2.
@@ -78,6 +79,7 @@ NULL
 #' nrow(lung)
 #' nrow(bigger_mod$x)
 #'
+#'
 #' # Mixed censoring types
 #' time1 = c(NA, 4, 7, 12, 10, 6, NA, 3) #NA for right censored
 #' time2 = c(14, 4, 10, 12, NA, 9, 5, NA) #NA for left censored
@@ -88,7 +90,7 @@ NULL
 #' mixedmod = mtlr(formula, dat)
 #'
 #' @seealso
-#' \code{\link[MTLR]{predict.mtlr}} \code{\link[MTLR]{plot.mtlr}} \code{\link[MTLR]{mtlr_cv}} \code{\link[MTLR]{predict.mtlr}}
+#' \code{\link[MTLR]{predict.mtlr}} \code{\link[MTLR]{mtlr_cv}} \code{\link[MTLR]{plot.mtlr}}  \code{\link[MTLR]{plotcurves}}
 #' @export
 mtlr <- function(formula,
                  data,

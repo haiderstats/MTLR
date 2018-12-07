@@ -8,7 +8,7 @@
 #' @param nfolds the number of internal cross validation folds, default is 5.
 #' @param foldtype type of cross validation folds. Full stratification, "fullstrat", sorts observations by their event time and their event indicators
 #' and numbers them off into folds. This effectively give each fold approximately the same number of uncensored observations as well as keeps the range
-#' of time points as equivalent as possible across folds. This type of cross-validation is completely determininstic.
+#' of time points as equivalent as possible across folds. This type of cross-validation is completely deterministic.
 #' Censored stratification, "censorstrat", will put approximately the same number of uncensored observations in each fold but not pay any attention to
 #' event time. This is partially stochastic. The totally random cross-validation, "random", randomly assigns observations to folds without considering
 #' event time nor event status.
@@ -55,7 +55,7 @@ mtlr_cv <- function(formula,
   y <- stats::model.response(mf)
   time <- y[,1]
   delta <- y[,2]
-  fold_index <- foldme(time,delta,nfolds,foldtype)
+  fold_index <- create_folds(time,delta,nfolds,foldtype)
   time_delta_names = attr(y,"dimnames")[[2]]
   #There may be some NAs in the time if we are in the inteval setting. We do not want to remove these rows since they
   #are valid NAs. However, we only want x values with nonmissing data.
