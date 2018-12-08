@@ -65,7 +65,7 @@ predict.mtlr <- function(object, newdata, type = c("survivalcurve","prob_event",
     Terms <- stats::delete.response(Terms)
     newframe <- stats::model.matrix(Terms, data=newdata,
                              xlev=object$xlevels)
-    newframe <- newframe[,-1] #Remove intercept term.
+    newframe <- newframe[1:nrow(newframe),-1, drop = FALSE] #Remove intercept term.
     if(!is.null(object$scale)){
       newframe <- scale(newframe, center = object$scale$center, scale = object$scale$sd)
       if(any(object$scale$sd == 0)) #If a variable had 0 variance in training set all the values to 0 since they will be NaN right now.
