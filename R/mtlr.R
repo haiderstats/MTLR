@@ -108,7 +108,9 @@ mtlr <- function(formula,
                  lower = -15,
                  upper = 15){
   cl <- match.call() #Save a copy of the function call.
-
+  if(any(dim(data)==0)){
+    stop("Dimensions of the dataset must be non-zero.")
+  }
   #Data setup
   mf <- stats::model.frame(formula = formula, data)
   Terms <- attr(mf, "terms")
@@ -156,6 +158,11 @@ mtlr <- function(formula,
     scale_centers <- attr(x, "scaled:center")
     scale_scale <- attr(x,"scaled:scale")
     scales <- list(center= scale_centers, sd = scale_scale)
+    if(any(scale_scale ==0)){
+      zeroVar = names(scale_scale)[which(scale_scale ==0)]
+      warning(paste("The feature(s): ", zeroVar, " have zero variance. These features have been set to zero to ensure a feature weight of zero."))
+      x[,which(scale_scale ==0)] = 0
+    }
   }else{
     scales <- NULL
   }
