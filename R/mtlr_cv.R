@@ -55,6 +55,9 @@ mtlr_cv <- function(formula,
   if(any(C1_vec < 0)){
     stop("All values of C1 must be non-negative.")
   }
+  if(any(dim(data)==0)){
+    stop("Dimensions of the dataset must be non-zero.")
+  }
   foldtype <- match.arg(foldtype)
 
 

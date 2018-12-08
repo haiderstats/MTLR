@@ -9,6 +9,13 @@ testthat::test_that("mtlr function is consistent for basic survival dataset",{
   expect_equal_to_reference(mtlr(formula,data),"mtlr_leuk.rds")
 })
 
+testthat::test_that("mtlr function doesn't fail for 0 varaince features",{
+  formula = survival::Surv(time,status)~.
+  data = survival::leukemia
+  data$x = 1
+  expect_warning(mtlr(formula,data))
+})
+
 testthat::test_that("mtlr function is consistent for more complex survival dataset",{
   formula = survival::Surv(time,status)~.
   data = survival::lung
@@ -82,6 +89,8 @@ testthat::test_that("mtlr argument specifications are working.",{
   expect_error(mtlr(formula,data, C1 = -1e-10),"C1 must be non-negative.")
   expect_error(mtlr(formula,data, threshold = -1e-10),"The threshold must be positive.")
   expect_error(mtlr(formula,data, threshold = 0),"The threshold must be positive.")
+  expect_error(mtlr(formula,data.frame()),"Dimensions of the dataset must be non-zero.")
+
 })
 
 testthat::test_that("when training mtlr fails optim error is caught",{
