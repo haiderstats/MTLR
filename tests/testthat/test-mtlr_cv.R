@@ -6,9 +6,7 @@ testthat::context("Testing the mtlr_cv function. Most tests are just checking ag
 testthat::test_that("mtlr_cv function is consistent for basic survival dataset",{
   formula = survival::Surv(time,status)~.
   data = survival::leukemia
-  skip_on_cran()
-  skip_on_travis()
-  expect_equal_to_reference(mtlr_cv(formula,data),"mtlrcv_leuk.rds")
+  expect_equal_to_reference(mtlr_cv(formula,data),"mtlrcv_leuk.rds", tolerance = 1e-3)
 })
 
 testthat::test_that("mtlr_cv function is consistent for more complex survival dataset",{
