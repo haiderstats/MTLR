@@ -77,8 +77,8 @@ testthat::test_that("log_loss functionality mixed uncensored and (left/interval/
   time1 = c(NA, 4, 7, 12, 10, 6, NA, 3,5,9,10,12,NA,4,6,2,NA,16,15,11)
   time2 = c(14, 4, 10, 12, NA, 9, 5, NA, NA, NA, NA, 15,22,4,8,6,2,20,23,11)
   set.seed(42)
-  data = cbind.data.frame(time1, time2, importantfeature = 1)
-  object <- mtlr(formula,data,normalize = F)
+  dat = cbind.data.frame(time1, time2, importantfeature = 1)
+  object <- mtlr(formula,dat,normalize = F)
 
   #All uncensored
   curves <- predict(object)
@@ -105,5 +105,5 @@ testthat::test_that("log_loss functionality mixed uncensored and (left/interval/
   probs = probsU - probsL
   loss = loss -sum(log(probs+1e-05))
 
-  expect_equal(loglik_loss(object,data),loss/nrow(newdata))
+  expect_equal(loglik_loss(object,dat),loss/nrow(dat))
 })
