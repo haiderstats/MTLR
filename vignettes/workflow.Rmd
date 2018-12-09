@@ -123,7 +123,7 @@ By default, `plot` will only look at the 5 features which had the largest sum of
 Now that we have trained a MTLR model we should make some predictions! This is where our `testing` set and the `predict` function will come into play. Note that there are a number of predictions we may be interested in acquiring. First, we may want to view the survival curves of our test observations.
 
 ```{r}
-survCurves = predict(fullMod, testing, type = "survivalcurve")
+survCurves <- predict(fullMod, testing, type = "survivalcurve")
 #survCurves is pretty large so we will look at the first 5 rows/columns.
 survCurves[1:5,1:5]
 ```
@@ -147,10 +147,10 @@ In addition to the entire survival curve one may also be interested in the avera
 
 ```{r}
 #Mean
-meanSurv = predict(fullMod, testing, type = "mean_time")
+meanSurv <- predict(fullMod, testing, type = "mean_time")
 head(meanSurv)
 #Median
-medianSurv = predict(fullMod, testing, type = "median_time")
+medianSurv <- predict(fullMod, testing, type = "median_time")
 head(medianSurv)
 ```
 

@@ -4,10 +4,10 @@ testthat::context("plotcurves is consistent with previous plots.")
 
 # plotcurves ------------------------------------------------------------
 testthat::test_that("plotcurves function is consistent",{
-  formula = survival::Surv(time,status)~.
-  data = survival::lung
-  mod = mtlr(formula,data)
-  curves = predict(mod)
+  formula <- survival::Surv(time,status)~.
+  data <- survival::lung
+  mod <- mtlr(formula,data)
+  curves <- predict(mod)
   expect_warning(plotcurves(curves, index=  1:3, color = c("red","green")))
 
   expect_equal_to_reference(plotcurves(curves), "1curve.rds")

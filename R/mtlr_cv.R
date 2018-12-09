@@ -76,7 +76,7 @@ mtlr_cv <- function(formula,
     nintervals <- ceiling(sqrt(((nfolds-1)/nfolds)*nrow(y))) #Default number of intervals is the sq. root of the number of observations in k-1/k % of the data.
   }
   if(previous_weights){
-    parList = list()
+    parList <- list()
   }
   for(fold in 1:nfolds){
     datacv <- data[-fold_index[[fold]],]
@@ -87,7 +87,7 @@ mtlr_cv <- function(formula,
           mod <- mtlr(formula,datacv,time_points,nintervals,
                       normalize, C1_vec[i], train_biases, seed_weights,
                       threshold, maxit, lower, upper)
-          parList[[i]] = c(mod$weight_matrix)
+          parList[[i]] <- c(mod$weight_matrix)
         }else{
           mod <- mtlr(formula,datacv,time_points,nintervals,
                       normalize, C1_vec[i], train_biases, parList[[i]],

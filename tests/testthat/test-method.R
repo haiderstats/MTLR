@@ -8,22 +8,22 @@ testthat::context("Testing methods for mtlr objects.")
 
 # mtlr ------------------------------------------------------------
 testthat::test_that("print and plot functions are consistent for basic survival dataset",{
-  formula = survival::Surv(time,status)~.
-  data = survival::lung
-  mod = mtlr(formula, data)
+  formula <- survival::Surv(time,status)~.
+  data <- survival::lung
+  mod <- mtlr(formula, data)
   expect_equal_to_reference(print(mod),"print.rds")
   expect_equal_to_reference(plot(mod),"plot.rds" )
 
-  data = survival::leukemia
-  mod = mtlr(formula, data)
+  data <- survival::leukemia
+  mod <- mtlr(formula, data)
   expect_warning(plot(mod))
 })
 
 
 testthat::test_that("predict function works across the different types",{
-  formula = survival::Surv(time,status)~.
-  data = survival::lung
-  mod = mtlr(formula, data)
+  formula <- survival::Surv(time,status)~.
+  data <- survival::lung
+  mod <- mtlr(formula, data)
   expect_equal_to_reference(predict(mod,data, type = "prob_event"),"predProb.rds")
   expect_equal_to_reference(predict(mod,data, type = "mean_time"),"predMean.rds" )
   expect_equal_to_reference(predict(mod,data, type = "median_time"),"predMedian.rds" )
