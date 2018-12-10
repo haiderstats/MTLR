@@ -1,9 +1,12 @@
 ## Test environments
 * local OS X install, R 3.5.0
-* local ubuntu 16.04 install, R 3.4.4
-* travis-ci: ubuntu 14.04, oldrelease, release, devel
-* tracis-ci: OS X 10.3.3, oldrelease, release
-* win-builder (devel and release)
+* travis-ci: 
+  * ubuntu 14.04: oldrelease, release, devel
+  * OS X 10.3.3, oldrelease, release
+* win-builder: oldrelease, release, and devel
+* Rhub:
+  * Ubuntu Linux 16.04 LTS, R-release, GCC
+  * Windows Server 2008 R2 SP1, R-devel, 32/64 bit
 
 ## R CMD check results
 There were no ERRORs or WARNINGs.
@@ -18,7 +21,7 @@ There was 1 NOTE:
   al (10:57)
   et (10:54)
 
-  These words here are either abbreviations (MTLR) or references to the authors (Yu et al.) of the paper that the method in this package is based on. 
+These words here are either abbreviations (MTLR) or references to the authors (Yu et al.) of the paper that the methods in this package are based on. 
 
 ## Downstream dependencies
-There are currently no downstream dependencies for this package as it is a new submission.
+* There are currently no downstream dependencies for this package as it is a new submission.
