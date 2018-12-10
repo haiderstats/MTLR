@@ -2,7 +2,7 @@
 % Please edit documentation in R/mtlr.R
 \name{mtlr}
 \alias{mtlr}
-\title{Train a Mutli-Task Logistic Regression (MTLR) Model}
+\title{Train a Multi-Task Logistic Regression (MTLR) Model}
 \usage{
 mtlr(formula, data, time_points = NULL, nintervals = NULL,
   normalize = T, C1 = 1, train_biases = T, seed_weights = NULL,

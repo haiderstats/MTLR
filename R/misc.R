@@ -1,6 +1,6 @@
 #' Create folds for cross-validation.
 #'
-#' Create the test folds for k-fold cross validation. These cross-validation types differ from typical stratefied cross-validation as this function also
+#' Create the test folds for k-fold cross validation. These cross-validation types differ from typical stratified cross-validation as this function also
 #' considers the range of event times in the data.
 #' @param time a vector of event times.
 #' @param delta a vector of indicators for uncensored/censored data. The type of censoring here is not considered so it is suggested this function not

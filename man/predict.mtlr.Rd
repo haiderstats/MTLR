@@ -12,7 +12,7 @@
 
 \item{newdata}{an optional new dataframe for which to perform predictions using MTLR. If left empty, predictions will
 be performed using the dataset used to generate the original mtlr object -- note that any error calculation on these
-predictions will be optimistic since this will only be the resubstitution error and not be representitive of error on a new test set.}
+predictions will be optimistic since this will only be the resubstitution error and not be representative of error on a new test set.}
 
 \item{type}{the type of prediction desired. Options are the survival curve "survivalcurve", the probability of survival at the
 observations event time "prob_event", the mean survival time "mean_time", and the median survival time, "median_time".

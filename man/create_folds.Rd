@@ -29,7 +29,7 @@ event time nor event status.}
 a list of size nfolds where each list component contains the indices of the test data for each fold.
 }
 \description{
-Create the test folds for k-fold cross validation. These cross-validation types differ from typical stratefied cross-validation as this function also
+Create the test folds for k-fold cross validation. These cross-validation types differ from typical stratified cross-validation as this function also
 considers the range of event times in the data.
 }
 \seealso{

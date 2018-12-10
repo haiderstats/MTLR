@@ -18,7 +18,7 @@ given the legend will be removed as to not take up plotting space. To avoid this
 
 \item{xlim}{the limits of the x-axis (must be a 2 length vector).}
 
-\item{remove_legend}{if TRUE the legend will be removed if over 15 indicies are supplied. If FALSE the legend will remain, however be aware that the
+\item{remove_legend}{if TRUE the legend will be removed if over 15 indices are supplied. If FALSE the legend will remain, however be aware that the
 legend may take up lots of space.}
 }
 \description{

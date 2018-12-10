@@ -2,7 +2,7 @@
 #' @importFrom Rcpp sourceCpp
 NULL
 
-#' Train a Mutli-Task Logistic Regression (MTLR) Model
+#' Train a Multi-Task Logistic Regression (MTLR) Model
 #'
 #' Trains a MTLR model for survival prediction. Right, left, and interval censored data are all supported.
 #'

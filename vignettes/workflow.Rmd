@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 
 Here we give a brief introduction to using Multi-task Logistic Regression (MTLR) for survival prediction. Note that MTLR was specifically designed to give __survival probabilities__ across a __range of times__ for __individual observations__. This differs from models which produce risk scores (such as those given by Cox proportional hazards), single time probability models (such as the Gail model), and population wide models (*e.g.* Kaplan-Meier curves). Producing survival probabilities over a range of times gives a more holistic view of survival to patients and physicians which may be critical in making healthcare decisions. 
 
-MTLR was introduced first in 2011 at NIPS under the name, ["Learning Patient-Specific Cancer Survival Distributions as a Sequence of Dependent Regressors"](https://papers.nips.cc/paper/4210-learning-patient-specific-cancer-survival-distributions-as-a-sequence-of-dependent-regressors). Since then much work has been done including a [website](http://pssp.srv.ualberta.ca/) which can be used to build MTLR models on uploaded data. While this is an extremely beneficial resource we have extended MTLR to be included in the R environment to make comparisions to other survival methods and use tools included in other R packages, such as `survival` and `randomForestSRC`.
+MTLR was introduced first in 2011 at NIPS under the name, ["Learning Patient-Specific Cancer Survival Distributions as a Sequence of Dependent Regressors"](https://papers.nips.cc/paper/4210-learning-patient-specific-cancer-survival-distributions-as-a-sequence-of-dependent-regressors). Since then much work has been done including a [website](http://pssp.srv.ualberta.ca/) which can be used to build MTLR models on uploaded data. While this is an extremely beneficial resource we have extended MTLR to be included in the R environment to make comparisons to other survival methods and use tools included in other R packages, such as `survival` and `randomForestSRC`.
 
 
 MTLR can be used for survival data containing right, left, interval, or no censoring. In addition, these types of censoring can be mixed in the same dataset. Documentation on utilizing these different types of censoring can be found using `help(mtlr)`. In this vignette we will consider an example which includes right censoring only. Namely, we will be using the `lung` dataset from the `survival` package.
@@ -106,7 +106,7 @@ smallMod
 
 There is a lot to take in at first from the output of the `mtlr` model. The first item is simply the call that was used to build the model. Next is the time points that `mtlr` used to train the model. If these time points are not specified when constructing the model then `mtlr` will choose time points based on the quantiles of the event time feature. Additionally, the number of time points is chosen to be the sqrt(N) where N is the number of observations. Since we had 205 training instances and the sqrt(205 = 14.317) `mtlr` rounded up to 15 time points. 
 
-Last, `mtlr` outputs the weight matrix for the model -- these are the weights corresponding to each feature at each time point (additionally notice that we include the bias weights). The rownames correspond to the time point for which the feature weight belongs. If you would like to access these weights, they are saved in the model object as `weight_matrix` so you can access them using `smallMod$weight_matrix`.
+Last, `mtlr` outputs the weight matrix for the model -- these are the weights corresponding to each feature at each time point (additionally notice that we include the bias weights). The row names correspond to the time point for which the feature weight belongs. If you would like to access these weights, they are saved in the model object as `weight_matrix` so you can access them using `smallMod$weight_matrix`.
 
 We can also plot the weights for a `mtlr` model. Before we printed the small model but here we will look at the weights for the complete model.
 
@@ -175,7 +175,7 @@ head(testing$time)
 
 You will notice that some of these survival probabilities correspond to 0 (usually those with very large event times). We again have drawn the linear extension for the survival time if the event time could not be mapped onto the survival curve.
 
-##Miscellanious Commands
+##Miscellaneous Commands
 ###`mtlr_cv`
 Previously we just used the default settings of `mtlr`. However, a number of things can be adjusted included the number of time points, the exact time points used, the initialization of the feature weights, and the regularization parameter (C1) which corresponds to the C1 given in the [NIPS paper](https://papers.nips.cc/paper/4210-learning-patient-specific-cancer-survival-distributions-as-a-sequence-of-dependent-regressors). The `mtlr_cv` function helps to select a value of C1. Given a vector of values to test for C1, `mtlr_cv` will do internal cross validation to select the optimal C1 for some criteria. Currently the only optimization is referred to as the log-likelihood loss (see the "Details" section of `help(mtlr_cv)`). For example, we use this command with 5 values of C1 (although there is a default of (0.001,0.01,0.1,1,10,100,1000)).
 

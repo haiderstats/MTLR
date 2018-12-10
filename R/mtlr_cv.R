@@ -5,7 +5,7 @@
 #' of value tried to increase efficiency. Similarly for nfolds.
 #' @param previous_weights a boolean specifying if sequential folds should use the previous fold's parameters as seed_weights. Doing this will likely
 #' speed up the computation time for cross-validation as we are providing weights which are (likely) close to the optimal weights. Note that this is
-#' done seperately for each value of C1 so there is no parameter sharing between different values of C1, and instead only across the same value of C1.
+#' done separately for each value of C1 so there is no parameter sharing between different values of C1, and instead only across the same value of C1.
 #' @param loss a string indicating the loss to optimize for which to choose the regularization parameter. Currently only the log-likelihood (ll)
 #'  is supported.
 #' @param nfolds the number of internal cross validation folds, default is 5.
