@@ -1,10 +1,10 @@
 ---
-title: "Introduction to the MTLR workflow"
+title: "Introduction to the MTLR Workflow"
 author: "Humza Haider (hshaider@ualberta.ca)"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{Introduction to the MTLR Workflow}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
