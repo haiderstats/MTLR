@@ -79,6 +79,9 @@ mtlr_cv <- function(formula,
     parList <- list()
   }
   for(fold in 1:nfolds){
+    if(verbose){
+      print(paste("Starting fold ",fold," of ",nfolds,".", sep = ""))
+    }
     datacv <- data[-fold_index[[fold]],]
     result <- c()
     for(i in seq_along(C1_vec)){
