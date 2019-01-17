@@ -227,7 +227,7 @@ mtlr <- function(formula,
       zero_matrix <- matrix(0,ncol = ncol(x), nrow = nrow(x))   #We create a zero_matrix to train the biases
 
       bias_par <- stats::optim(par = rep(0,length(time_points)*(ncol(x) +1)),fn = mtlr_objVal,gr = mtlr_grad, yval = y_matrix,
-                               featureVal = zero_matrix, C1=C1, delta = sort(censInd),
+                               featureVal = zero_matrix, C1=C1, delta = rep(1,nrow(x)),
                                method = "L-BFGS-B", lower = lower, upper = upper, control = c(maxit = maxit, factr = threshold_factor))
       if(bias_par$convergence == 52)
         stop(paste("Error occured while training MTLR. Optim Error: ", bias_par$message))
