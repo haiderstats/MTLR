@@ -7,12 +7,12 @@
 using namespace Rcpp;
 
 // mtlr_objVal
-double mtlr_objVal(NumericVector params, arma::mat yval, arma::mat featureValue, double C1, arma::vec delta);
+double mtlr_objVal(arma::rowvec params, arma::mat yval, arma::mat featureValue, double C1, arma::vec delta);
 RcppExport SEXP _MTLR_mtlr_objVal(SEXP paramsSEXP, SEXP yvalSEXP, SEXP featureValueSEXP, SEXP C1SEXP, SEXP deltaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type params(paramsSEXP);
+    Rcpp::traits::input_parameter< arma::rowvec >::type params(paramsSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type yval(yvalSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type featureValue(featureValueSEXP);
     Rcpp::traits::input_parameter< double >::type C1(C1SEXP);
@@ -22,12 +22,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // mtlr_grad
-arma::rowvec mtlr_grad(NumericVector params, arma::mat yval, arma::mat featureValue, double C1, arma::vec delta);
+arma::rowvec mtlr_grad(arma::rowvec params, arma::mat yval, arma::mat featureValue, double C1, arma::vec delta);
 RcppExport SEXP _MTLR_mtlr_grad(SEXP paramsSEXP, SEXP yvalSEXP, SEXP featureValueSEXP, SEXP C1SEXP, SEXP deltaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type params(paramsSEXP);
+    Rcpp::traits::input_parameter< arma::rowvec >::type params(paramsSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type yval(yvalSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type featureValue(featureValueSEXP);
     Rcpp::traits::input_parameter< double >::type C1(C1SEXP);
@@ -37,12 +37,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // mtlr_predict
-arma::mat mtlr_predict(NumericVector params, arma::mat featureValue);
+arma::mat mtlr_predict(arma::rowvec params, arma::mat featureValue);
 RcppExport SEXP _MTLR_mtlr_predict(SEXP paramsSEXP, SEXP featureValueSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type params(paramsSEXP);
+    Rcpp::traits::input_parameter< arma::rowvec >::type params(paramsSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type featureValue(featureValueSEXP);
     rcpp_result_gen = Rcpp::wrap(mtlr_predict(params, featureValue));
     return rcpp_result_gen;

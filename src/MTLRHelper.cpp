@@ -31,25 +31,27 @@ using namespace std;
 // not just right censoring (the code is written so all censored instances are handled the same but dependent on yval).
 
 // [[Rcpp::export]]
-double mtlr_objVal(NumericVector params, arma::mat yval, arma::mat featureValue, double C1,arma::vec delta) {
+double mtlr_objVal(arma::rowvec params, arma::mat yval, arma::mat featureValue, double C1,arma::vec delta) {
   //For the objective value see Equation 3 of the MTLR paper.
 
   //We passed params in as a NumericVector because these are easier to parse and turn into a matrix.
   double valToReturn = 0;
   int N = featureValue.n_rows;
   int m = yval.n_rows-1;
-  Range biasIdx(0,m-1);
 
-  NumericVector biasVec = params[biasIdx];
-  NumericMatrix thetaMatrix(m,featureValue.n_cols);
-  int thetaSize = thetaMatrix.nrow() * thetaMatrix.ncol();
-  for (int i = 0; i < thetaSize; i++) {
-    thetaMatrix[i] = params[m+i];
+  arma::vec biases(m);
+  for(int i =0; i < m; i++){
+    biases(i) = params(i);
   }
 
-  //Initialize vairables
-  arma::mat thetas = as<arma::mat>(thetaMatrix);
-  arma::vec biases = as<arma::vec>(biasVec);
+  arma::mat thetas(m,featureValue.n_cols);
+  int count = m;
+  for(int j = 0; j < thetas.n_cols; j++) {
+    for(int i =0; i < thetas.n_rows; i++){
+      thetas(i,j) = params(count);
+      count++;
+    }
+  }
 
   //score will correspond to the f_Theta function given by Yu. et al (2011)
   arma::vec score(m,arma::fill::ones);
@@ -120,21 +122,25 @@ double mtlr_objVal(NumericVector params, arma::mat yval, arma::mat featureValue,
 //Here we will assume that the data is ordered such that all censored observations come first. We could abstract (fairly easily)
 //away from this requirement but then we would be doing the same operation multiple times within the bottleneck of the code.
 // [[Rcpp::export]]
-arma::rowvec mtlr_grad(NumericVector params, arma::mat yval, arma::mat featureValue, double C1, arma::vec delta) {
+arma::rowvec mtlr_grad(arma::rowvec params, arma::mat yval, arma::mat featureValue, double C1, arma::vec delta) {
   double N = featureValue.n_rows;
   double P = featureValue.n_cols;
   int m = yval.n_rows -1;
-  Range biasIdx(0,m-1);
 
-  NumericVector biasVec = params[biasIdx];
-  NumericMatrix thetaMatrix(m,P);
-  int thetaSize = thetaMatrix.nrow() * thetaMatrix.ncol();
-  for (int i = 0; i < thetaSize; i++) {
-    thetaMatrix[i] = params[m+i];
+  arma::vec biases(m);
+  for(int i =0; i < m; i++){
+    biases(i) = params(i);
   }
 
-  arma::mat thetas = as<arma::mat>(thetaMatrix);
-  arma::vec biases = as<arma::vec>(biasVec);
+  arma::mat thetas(m,featureValue.n_cols);
+  int count = m;
+  for(int j = 0; j < thetas.n_cols; j++) {
+    for(int i =0; i < thetas.n_rows; i++){
+      thetas(i,j) = params(count);
+      count++;
+    }
+  }
+
   arma::vec BiasGradient = arma::zeros<arma::vec>(biases.n_elem);
   arma::mat ThetaGradient = arma::zeros<arma::mat>(thetas.n_rows, thetas.n_cols);
   arma::rowvec Xval(P, arma::fill::ones);
@@ -225,7 +231,8 @@ arma::rowvec mtlr_grad(NumericVector params, arma::mat yval, arma::mat featureVa
   }
 
   //yval has an extra row for censored data. Here we remove it before dealing with uncensored data.
-  yval.shed_row(m);
+  arma::mat yvalReduced = yval;
+  yvalReduced.shed_row(m);
   //Begin uncensored observation gradients.
   for(int i=NCens;i<N;i++){
     Xval = featureValue.row(i);
@@ -242,8 +249,8 @@ arma::rowvec mtlr_grad(NumericVector params, arma::mat yval, arma::mat featureVa
 
     NormNumer *= Xval;
     ThetaNorm = NormNumer/NormDenom;
-    partialBiasGrad =  sum(yval.col(i) - BiasNorm.each_col(), 1);
-    partialThetaGrad =  yval.col(i) * Xval - ThetaNorm;
+    partialBiasGrad =  sum(yvalReduced.col(i) - BiasNorm.each_col(), 1);
+    partialThetaGrad =  yvalReduced.col(i) * Xval - ThetaNorm;
     BiasGradient -= partialBiasGrad/N;
 
     //Note we use += here since we later subtract from the regularization term.
@@ -259,23 +266,24 @@ arma::rowvec mtlr_grad(NumericVector params, arma::mat yval, arma::mat featureVa
 //See mltr_objVal for argument definitions.
 //This is used for predicting survival curves given feature weights.
 // [[Rcpp::export]]
-arma::mat mtlr_predict(NumericVector params,arma::mat featureValue){
+arma::mat mtlr_predict(arma::rowvec params,arma::mat featureValue){
   double N = featureValue.n_rows;
   double P = featureValue.n_cols;
 
-
   double m = params.size()/(P+1); // +1 to account for bias terms.
-  Range biasIdx(0,m-1);
-
-  NumericVector biasVec = params[biasIdx];
-  NumericMatrix thetaMatrix(m,featureValue.n_cols);
-  int thetaSize = thetaMatrix.nrow() * thetaMatrix.ncol();
-  for (int i = 0; i < thetaSize; i++) {
-    thetaMatrix[i] = params[m+i];
+  arma::vec biases(m);
+  for(int i =0; i < m; i++){
+    biases(i) = params(i);
   }
-  arma::mat thetas = as<arma::mat>(thetaMatrix);
-  arma::vec biases = as<arma::vec>(biasVec);
 
+  arma::mat thetas(m,featureValue.n_cols);
+  int count = m;
+  for(int j = 0; j < thetas.n_cols; j++) {
+    for(int i =0; i < thetas.n_rows; i++){
+      thetas(i,j) = params(count);
+      count++;
+    }
+  }
 
   arma::mat resMat = thetas*featureValue.t();
   resMat.each_col() += biases;
