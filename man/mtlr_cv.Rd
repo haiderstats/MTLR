@@ -6,10 +6,10 @@
 \usage{
 mtlr_cv(formula, data, time_points = NULL, nintervals = NULL,
   normalize = T, C1_vec = c(0.001, 0.01, 0.1, 1, 10, 100, 1000),
-  train_biases = T, seed_weights = NULL, previous_weights = T,
-  loss = c("ll"), nfolds = 5, foldtype = c("fullstrat",
-  "censorstrat", "random"), verbose = FALSE, threshold = 1e-05,
-  maxit = 5000, lower = -15, upper = 15)
+  train_biases = T, train_uncensored = T, seed_weights = NULL,
+  previous_weights = T, loss = c("ll"), nfolds = 5,
+  foldtype = c("fullstrat", "censorstrat", "random"), verbose = FALSE,
+  threshold = 1e-05, maxit = 5000, lower = -15, upper = 15)
 }
 \arguments{
 \item{formula}{a formula object with the response to the left of the "~" operator. The response must be a survival object returned
@@ -33,6 +33,10 @@ of value tried to increase efficiency. Similarly for nfolds.}
 
 \item{train_biases}{if TRUE, biases will be trained before feature weights (and again trained while training feature weights). This
 has shown to speed up total training time.}
+
+\item{train_uncensored}{if TRUE, one round of training will occur assuming all event times are uncensored. This is done due to the non-convexity issue
+that arrises in the presence of censored data. However if ALL data is censored we reccomend setting this option to FALSE as it has shown to give poor
+results in this case.}
 
 \item{seed_weights}{the initialization weights for the biases and the features. If left as NULL all weights are initialized to zero. If seed_weights are
 specified then either nintervals or time_points must also be specified. The length of seed_weights should correspond to (number of features + 1)*(length of

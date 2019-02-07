@@ -21,6 +21,9 @@ NULL
 #'  Regressors" by Yu et al. (2011) for details.
 #' @param train_biases if TRUE, biases will be trained before feature weights (and again trained while training feature weights). This
 #' has shown to speed up total training time.
+#' @param train_uncensored if TRUE, one round of training will occur assuming all event times are uncensored. This is done due to the non-convexity issue
+#' that arrises in the presence of censored data. However if ALL data is censored we reccomend setting this option to FALSE as it has shown to give poor
+#' results in this case.
 #' @param seed_weights the initialization weights for the biases and the features. If left as NULL all weights are initialized to zero. If seed_weights are
 #' specified then either nintervals or time_points must also be specified. The length of seed_weights should correspond to (number of features + 1)*(length of
 #' time_points) = (number of features + 1)*(nintervals + 1).
@@ -37,8 +40,9 @@ NULL
 #' Weights are initialized to 0 prior to training. Under default settings, the bias weights
 #' will be trained before considering feature weights. As Yu et al. (2011) specified, the introduction of censored observations creates a non-convex
 #' loss function. To address this, weights are first trained assuming all event times are \emph{uncensored}. Once these starting weights have
-#' been trained another round of training is performed using the true values of the event indicator (censored/uncensored). Future iterations of this
-#' package will add more options to address this non-convexity.
+#' been trained another round of training is performed using the true values of the event indicator (censored/uncensored). However, in the event of
+#' all censored data this has shown to negatively effect the results. If all data is censored (either left, right, or interval2) we suggest setting
+#' train_uncensored = FALSE.
 #'
 #' Yu et al. (2011) actually suggested two regularization parameters, C1 to control the size of the feature weights and C2 to control the smoothness.
 #' In Ping Jin's masters thesis (Using Survival Prediction Techniques to Learn Consumer-Specific Reservation Price Distributions) he showed that C2
@@ -102,6 +106,7 @@ mtlr <- function(formula,
                  normalize = T,
                  C1 = 1,
                  train_biases = T,
+                 train_uncensored =T,
                  seed_weights = NULL,
                  threshold = 1e-05,
                  maxit = 5000,
@@ -234,11 +239,14 @@ mtlr <- function(formula,
     }else{
       bias_par <- list(par = rep(0,length(time_points)*(ncol(x) +1)))
     }
-
-    params_uncensored <- stats::optim(par = bias_par$par,fn = mtlr_objVal, gr = mtlr_grad, yval = y_matrix, featureVal = x, C1 = C1, delta = rep(1,nrow(x)),
-                                      method = "L-BFGS-B", lower = lower, upper = upper, control = c(maxit = maxit, factr = threshold_factor))
-    if(params_uncensored$convergence == 52)
+    if(train_uncensored){
+      params_uncensored <- stats::optim(par = bias_par$par,fn = mtlr_objVal, gr = mtlr_grad, yval = y_matrix, featureVal = x, C1 = C1, delta = rep(1,nrow(x)),
+                                        method = "L-BFGS-B", lower = lower, upper = upper, control = c(maxit = maxit, factr = threshold_factor))
+      if(params_uncensored$convergence == 52)
       stop(paste("Error occured while training MTLR. Optim Error: ", params_uncensored$message))
+    }else{
+      params_uncensored = bias_par
+    }
 
     final_params <- stats::optim(par = params_uncensored$par,fn = mtlr_objVal,gr = mtlr_grad, yval = y_matrix, featureVal = x, C1 = C1,delta = sort(censInd),
                                  method = "L-BFGS-B", lower = lower, upper = upper, control = c(maxit = maxit, factr = threshold_factor))

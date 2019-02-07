@@ -5,8 +5,9 @@
 \title{Train a Multi-Task Logistic Regression (MTLR) Model}
 \usage{
 mtlr(formula, data, time_points = NULL, nintervals = NULL,
-  normalize = T, C1 = 1, train_biases = T, seed_weights = NULL,
-  threshold = 1e-05, maxit = 5000, lower = -15, upper = 15)
+  normalize = T, C1 = 1, train_biases = T, train_uncensored = T,
+  seed_weights = NULL, threshold = 1e-05, maxit = 5000,
+  lower = -15, upper = 15)
 }
 \arguments{
 \item{formula}{a formula object with the response to the left of the "~" operator. The response must be a survival object returned
@@ -30,6 +31,10 @@ Regressors" by Yu et al. (2011) for details.}
 
 \item{train_biases}{if TRUE, biases will be trained before feature weights (and again trained while training feature weights). This
 has shown to speed up total training time.}
+
+\item{train_uncensored}{if TRUE, one round of training will occur assuming all event times are uncensored. This is done due to the non-convexity issue
+that arrises in the presence of censored data. However if ALL data is censored we reccomend setting this option to FALSE as it has shown to give poor
+results in this case.}
 
 \item{seed_weights}{the initialization weights for the biases and the features. If left as NULL all weights are initialized to zero. If seed_weights are
 specified then either nintervals or time_points must also be specified. The length of seed_weights should correspond to (number of features + 1)*(length of
@@ -74,8 +79,9 @@ likely become available in the future.
 Weights are initialized to 0 prior to training. Under default settings, the bias weights
 will be trained before considering feature weights. As Yu et al. (2011) specified, the introduction of censored observations creates a non-convex
 loss function. To address this, weights are first trained assuming all event times are \emph{uncensored}. Once these starting weights have
-been trained another round of training is performed using the true values of the event indicator (censored/uncensored). Future iterations of this
-package will add more options to address this non-convexity.
+been trained another round of training is performed using the true values of the event indicator (censored/uncensored). However, in the event of
+all censored data this has shown to negatively effect the results. If all data is censored (either left, right, or interval2) we suggest setting
+train_uncensored = FALSE.
 
 Yu et al. (2011) actually suggested two regularization parameters, C1 to control the size of the feature weights and C2 to control the smoothness.
 In Ping Jin's masters thesis (Using Survival Prediction Techniques to Learn Consumer-Specific Reservation Price Distributions) he showed that C2

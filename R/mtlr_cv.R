@@ -42,6 +42,7 @@ mtlr_cv <- function(formula,
                  normalize = T,
                  C1_vec = c(0.001,0.01,0.1,1,10,100,1000),
                  train_biases = T,
+                 train_uncensored = T,
                  seed_weights = NULL,
                  previous_weights = T,
                  loss = c("ll"),
@@ -88,17 +89,17 @@ mtlr_cv <- function(formula,
       if(previous_weights){
         if(fold == 1){
           mod <- mtlr(formula,datacv,time_points,nintervals,
-                      normalize, C1_vec[i], train_biases, seed_weights,
+                      normalize, C1_vec[i], train_biases,train_uncensored, seed_weights,
                       threshold, maxit, lower, upper)
           parList[[i]] <- c(mod$weight_matrix)
         }else{
           mod <- mtlr(formula,datacv,time_points,nintervals,
-                      normalize, C1_vec[i], train_biases, parList[[i]],
+                      normalize, C1_vec[i], train_biases,train_uncensored, parList[[i]],
                       threshold, maxit, lower, upper)
         }
       }else{
         mod <- mtlr(formula,datacv,time_points,nintervals,
-                    normalize, C1_vec[i], train_biases, seed_weights,
+                    normalize, C1_vec[i], train_biases,train_uncensored, seed_weights,
                     threshold, maxit, lower, upper)
       }
       result <- c(result, loglik_loss(mod,data[fold_index[[fold]],]))
