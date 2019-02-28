@@ -65,8 +65,8 @@ mtlr_cv <- function(formula,
   foldtype <- match.arg(foldtype)
   loss <- match.arg(loss)
   lossfnc <- switch(loss,
-                    ll <- loglik_loss,
-                    concordance <- concordance_loss
+                    ll = loglik_loss,
+                    concordance = concordance_loss
   )
   mf <- stats::model.frame(formula = formula, data)
   y <- stats::model.response(mf)
