@@ -6,8 +6,8 @@
 #' @param previous_weights a boolean specifying if sequential folds should use the previous fold's parameters as seed_weights. Doing this will likely
 #' speed up the computation time for cross-validation as we are providing weights which are (likely) close to the optimal weights. Note that this is
 #' done separately for each value of C1 so there is no parameter sharing between different values of C1, and instead only across the same value of C1.
-#' @param loss a string indicating the loss to optimize for which to choose the regularization parameter. Currently only the log-likelihood (ll)
-#'  is supported.
+#' @param loss a string indicating the loss to optimize for which to choose the regularization parameter. Currently one can optimize for the log-likelihood ("ll")
+#'  or concordance ("concordance"). See details regarding these losses.
 #' @param nfolds the number of internal cross validation folds, default is 5.
 #' @param foldtype type of cross validation folds. Full stratification, "fullstrat", sorts observations by their event time and their event indicators
 #' and numbers them off into folds. This effectively give each fold approximately the same number of uncensored observations as well as keeps the range
@@ -16,13 +16,15 @@
 #' event time. This is partially stochastic. The totally random cross-validation, "random", randomly assigns observations to folds without considering
 #' event time nor event status.
 #' @param verbose if TRUE the progress will be printed for every completed value of C1.
-#' @details Currently only the log-likelihood loss is supported for optimizing C1. Here the loss considers censored and uncensored observations differently.
+#' @details The log-likelihood loss and concordance are supported for optimizing C1. Here the log-likelihood loss considers censored and uncensored observations differently.
 #' For uncensored observations, we assign a loss of the negative log probability assigned to the interval in which the observation had their event, \emph{e.g.}
 #' if an observation had a 20% chance of having its event between timepoint1 and timepoint2 and it did have it's event in that interval then the loss
 #' is -log(0.2). We want these probabilities to be large so we would normally want to maximize this value (since logs of probabilities are negative)
 #' but we take the negative and instead minimize the value, thus we want the lowest loss. For censored observations we take the log of the probability
 #' of survival at the time of censoring, \emph{e.g.} if an observation is censored at time = 42 we take the negative log of the survival probability assigned
 #' to time 42 as the loss.
+#'
+#' For the concordance loss, C1 is chosen to maximize the overall concordance when using the negative median as the "risk" score. This is completed using survConcordance in the survival package.
 #' @return Performing mtlr_cv will return the following:
 #' \itemize{
 #'   \item best_C1: The value of C1 which achieved the best (lowest) loss.
@@ -45,14 +47,15 @@ mtlr_cv <- function(formula,
                  train_uncensored = T,
                  seed_weights = NULL,
                  previous_weights = T,
-                 loss = c("ll"),
+                 loss = c("ll","concordance"),
                  nfolds = 5,
                  foldtype = c("fullstrat","censorstrat","random"),
                  verbose = FALSE,
                  threshold = 1e-05,
                  maxit = 5000,
                  lower = -15,
-                 upper = 15){
+                 upper = 15
+                 ){
   if(any(C1_vec < 0)){
     stop("All values of C1 must be non-negative.")
   }
@@ -60,8 +63,11 @@ mtlr_cv <- function(formula,
     stop("Dimensions of the dataset must be non-zero.")
   }
   foldtype <- match.arg(foldtype)
-
-
+  loss <- match.arg(loss)
+  lossfnc <- switch(loss,
+                    ll <- loglik_loss,
+                    concordance <- concordance_loss
+  )
   mf <- stats::model.frame(formula = formula, data)
   y <- stats::model.response(mf)
   time <- y[,1]
@@ -102,15 +108,16 @@ mtlr_cv <- function(formula,
                     normalize, C1_vec[i], train_biases,train_uncensored, seed_weights,
                     threshold, maxit, lower, upper)
       }
-      result <- c(result, loglik_loss(mod,data[fold_index[[fold]],]))
+      result <- c(result, lossfnc(mod,data[fold_index[[fold]],]))
     }
     res_mat[fold,] <- result
   }
   avg_results <- apply(res_mat, 2, mean)
   names(avg_results) <- C1_vec
   best_C1 <- C1_vec[which.min(avg_results)]
-
-
+  if(loss == "concordance"){
+    avg_results <- -1*avg_results
+  }
   to_return <- list(best_C1 = best_C1, avg_loss = avg_results)
   return(to_return)
 }

@@ -57,7 +57,7 @@ predict_mean <- function(survival_curve, predicted_times){
 
 
 predict_median <- function(survival_curve, predicted_times){
-  #If all the predicted probabilities are 1 the integral will be infinite.
+  #If all the predicted probabilities are 1 the median will be infinite.
   if(all(survival_curve==1)){
     return(Inf)
   }
@@ -173,6 +173,17 @@ loglik_loss <- function(object, newdata){
     logloss <- logloss  - sum(log(probs+1e-05))
   }
   return(logloss/nrow(newdata))
+}
+
+
+concordance_loss <- function(object, newdata){
+  #Get the survival curves for all observations.
+  preds <- -1*predict.mtlr(object,newdata, type = "median")
+  Terms <- object$Terms
+  mf <- stats::model.frame(Terms, data=newdata,xlev=object$xlevels)
+  response <- stats::model.response(mf)
+  conc <- -1*unname(survival::survConcordance(response~preds)$concordance)
+  return(conc)
 }
 
 
