@@ -111,7 +111,7 @@ mtlr_cv <- function(formula,
   best_C1 <- C1_vec[which.min(avg_results)]
 
 
-  to_return <- list(bestC1 = best_C1, avg_loss = avg_results)
+  to_return <- list(best_C1 = best_C1, avg_loss = avg_results)
   return(to_return)
 }
 
