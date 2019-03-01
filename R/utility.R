@@ -153,6 +153,8 @@ loglik_loss <- function(object, newdata){
       if(length(interval_probL)){
         interval_prob <- interval_probL - interval_probU
         censor_prob <- c(left_right_prob, interval_prob)
+      }else{
+        censor_prob = left_right_prob
       }
       logloss <- logloss - sum(log(censor_prob + 1e-05))
     }
