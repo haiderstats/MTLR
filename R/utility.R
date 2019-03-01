@@ -131,28 +131,28 @@ loglik_loss <- function(object, newdata){
         logloss <- logloss - sum(log(1-censor_prob + 1e-05))
       }
     }else{
-      left_right = which(delta %in% c(0,2))
-      interval = which(delta %in% c(3))
-      left_right_prob = sapply(left_right,
+      left_right <- which(delta %in% c(0,2))
+      interval <- which(delta %in% c(3))
+      left_right_prob <- sapply(left_right,
                                function(index) predict_prob(curves[,index+1],
                                                             curves[,1],
                                                             event_times[index]
                                ))
-      interval_probL = sapply(interval,
+      interval_probL <- sapply(interval,
                               function(index) predict_prob(curves[,index+1],
                                                            curves[,1],
                                                            event_times[index]
                               ))
-      interval_probU = sapply(interval,
+      interval_probU <- sapply(interval,
                               function(index) predict_prob(curves[,index+1],
                                                            curves[,1],
                                                            event_times2[index]
                               ))
 
-      left_right_prob = ifelse(left_right %in% which(delta==0), left_right_prob, 1 - left_right_prob)
+      left_right_prob <- ifelse(left_right %in% which(delta==0), left_right_prob, 1 - left_right_prob)
       if(length(interval_probL)){
-        interval_prob = interval_probL - interval_probU
-        censor_prob = c(left_right_prob, interval_prob)
+        interval_prob <- interval_probL - interval_probU
+        censor_prob <- c(left_right_prob, interval_prob)
       }
       logloss <- logloss - sum(log(censor_prob + 1e-05))
     }
