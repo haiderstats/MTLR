@@ -13,11 +13,10 @@
 #' Censored stratification, "censorstrat", will put approximately the same number of uncensored observations in each fold but not pay any attention to
 #' event time. This is partially stochastic. The totally random cross-validation, "random", randomly assigns observations to folds without considering
 #' event time nor event status.
-#' @param ... for future methods.
 #' @return a list of size nfolds where each list component contains the indices of the test data for each fold.
 #' @seealso \code{\link[MTLR]{mtlr_cv}}
 #' @export
-create_folds <- function(time, delta, nfolds,foldtype = c("fullstrat","censorstrat","random"), ...){
+create_folds <- function(time, delta, nfolds, foldtype = c("fullstrat","censorstrat","random")){
   if(nfolds < 1)
     stop("Number of folds must be greater than 0.")
   type <- match.arg(foldtype)
