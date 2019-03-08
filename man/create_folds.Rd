@@ -5,7 +5,7 @@
 \title{Create folds for cross-validation.}
 \usage{
 create_folds(time, delta, nfolds, foldtype = c("fullstrat",
-  "censorstrat", "random"), ...)
+  "censorstrat", "random"))
 }
 \arguments{
 \item{time}{a vector of event times.}
@@ -22,8 +22,6 @@ of time points as equivalent as possible across folds. This type of cross-valida
 Censored stratification, "censorstrat", will put approximately the same number of uncensored observations in each fold but not pay any attention to
 event time. This is partially stochastic. The totally random cross-validation, "random", randomly assigns observations to folds without considering
 event time nor event status.}
-
-\item{...}{for future methods.}
 }
 \value{
 a list of size nfolds where each list component contains the indices of the test data for each fold.
