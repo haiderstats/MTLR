@@ -9,6 +9,19 @@ testthat::test_that("mtlr_cv function is consistent for basic survival dataset",
   expect_equal_to_reference(mtlr_cv(formula,data),"mtlrcv_leuk.rds", tolerance = 1e-3)
 })
 
+testthat::test_that("mtlr_cv function is consistent when ignoring previous weights",{
+  formula <- survival::Surv(time,status)~.
+  data <- survival::leukemia
+  expect_equal_to_reference(mtlr_cv(formula,data,previous_weights = F),"mtlrcv_leukNoPrev.rds", tolerance = 1e-3)
+})
+
+testthat::test_that("mtlr_cv function is consistent for concordance loss",{
+  formula <- survival::Surv(time,status)~.
+  data <- survival::leukemia
+  expect_equal_to_reference(mtlr_cv(formula,data, loss = "concordance"),"mtlrcv_leukConcordance.rds", tolerance = 1e-3)
+})
+
+
 testthat::test_that("mtlr_cv function is consistent for more complex survival dataset",{
   formula <- survival::Surv(time,status)~.
   data <- survival::lung
