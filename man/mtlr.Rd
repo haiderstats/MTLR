@@ -33,7 +33,7 @@ Regressors" by Yu et al. (2011) for details.}
 has shown to speed up total training time.}
 
 \item{train_uncensored}{if TRUE, one round of training will occur assuming all event times are uncensored. This is done due to the non-convexity issue
-that arrises in the presence of censored data. However if ALL data is censored we reccomend setting this option to FALSE as it has shown to give poor
+that arises in the presence of censored data. However if ALL data is censored we recommend setting this option to FALSE as it has shown to give poor
 results in this case.}
 
 \item{seed_weights}{the initialization weights for the biases and the features. If left as NULL all weights are initialized to zero. If seed_weights are
