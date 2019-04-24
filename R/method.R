@@ -101,7 +101,7 @@ predict.mtlr <- function(object, newdata, type = c("survivalcurve","prob_times",
   switch(type,
          survivalcurve = surv_curves,
          prob_times = {
-           surv = cbind.data.frame(time = times, sapply(1:(ncol(surv_curves)-1), function(i) predict_prob(surv_curves[,i+1], time_points, times)))
+           surv = cbind.data.frame(time = times, sapply(surv_curves[,-1], function(x) predict_prob(x, time_points, times)))
            #We get row names of 'times' so we will remove those.
            row.names(surv) = NULL
            surv
@@ -114,13 +114,13 @@ predict.mtlr <- function(object, newdata, type = c("survivalcurve","prob_times",
              y <- object$response
            }
            event_times <- y[,1]
-           sapply(1:(ncol(surv_curves)-1), function(i) predict_prob(surv_curves[,i+1], time_points,event_times[i]))
+           unname(mapply(function(x,y) predict_prob(x, time_points,y), surv_curves[,-1], event_times))
          },
          mean_time = {
-           sapply(1:(ncol(surv_curves)-1),function(i) predict_mean(surv_curves[,i+1], time_points))
+           unname(sapply(surv_curves[,-1], function(x) predict_mean(x, time_points)))
          },
          median_time = {
-           sapply(1:(ncol(surv_curves)-1),function(i) predict_median(surv_curves[,i+1], time_points))
+           unname(sapply(surv_curves[,-1],function(x) predict_median(x, time_points)))
          }
   )
 }

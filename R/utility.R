@@ -118,6 +118,10 @@ loglik_loss <- function(object, newdata){
                                                          curves[,1],
                                                          event_times[index]
                             ))
+      censor_curves = curves[,(censor_ind +1), drop=F]
+      censor_event = event_times[censor_ind]
+      censor_prob <- mapply(function(x,y) predict_prob(x, curves[,1],y),
+                            censor_curves, censor_event)
       #Currently we add a value of 0.00001 to all values since otherwise we might take the log of 0.
       #This is clearly not ideal but shouldn't make a large impact especially since this is only used for selecting C1.
       if(type == "right"){
@@ -130,21 +134,21 @@ loglik_loss <- function(object, newdata){
     }else{
       left_right <- which(delta %in% c(0,2))
       interval <- which(delta %in% c(3))
-      left_right_prob <- sapply(left_right,
-                               function(index) predict_prob(curves[,index+1],
-                                                            curves[,1],
-                                                            event_times[index]
-                               ))
-      interval_probL <- sapply(interval,
-                              function(index) predict_prob(curves[,index+1],
-                                                           curves[,1],
-                                                           event_times[index]
-                              ))
-      interval_probU <- sapply(interval,
-                              function(index) predict_prob(curves[,index+1],
-                                                           curves[,1],
-                                                           event_times2[index]
-                              ))
+
+
+      left_right_curves = curves[,(left_right +1), drop=F]
+      left_right_event = event_times[left_right]
+      left_right_prob <- mapply(function(x,y) predict_prob(x, curves[,1],y),
+                            left_right_curves, left_right_event)
+
+      interval_curves = curves[,(interval +1), drop=F]
+      interval_eventL = event_times[interval]
+      interval_eventU = event_times2[interval]
+
+      interval_probL <- mapply(function(x,y) predict_prob(x, curves[,1],y),
+                               interval_curves, interval_eventL)
+      interval_probU <- mapply(function(x,y) predict_prob(x, curves[,1],y),
+                               interval_curves, interval_eventU)
 
       left_right_prob <- ifelse(left_right %in% which(delta==0), left_right_prob, 1 - left_right_prob)
       if(length(interval_probL)){
