@@ -33,14 +33,14 @@ testthat::test_that("predict_prob flat survival curve",{
   expect_equal(predict_prob(survival_curve, predicted_times, 1000), 1.00)
 })
 
-testthat::test_that("predict_prob linear extension functionality",{
+testthat::test_that("predict_prob constant extension functionality",{
   survival_curve <- seq(1,.5,length.out = 51)
   predicted_times <- 0:50
 
-  expect_equal(predict_prob(survival_curve, predicted_times, 51), 0.49)
-  expect_equal(predict_prob(survival_curve, predicted_times, 75), 0.25)
-  expect_equal(predict_prob(survival_curve, predicted_times, 100), 0.00)
-  expect_equal(predict_prob(survival_curve, predicted_times, 150), 0)
+  expect_equal(predict_prob(survival_curve, predicted_times, 51), 0.5)
+  expect_equal(predict_prob(survival_curve, predicted_times, 75), 0.5)
+  expect_equal(predict_prob(survival_curve, predicted_times, 100), 0.5)
+  expect_equal(predict_prob(survival_curve, predicted_times, 150), 0.5)
 })
 
 
