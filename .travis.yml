@@ -9,6 +9,8 @@ r:
 os:
   - linux
   - osx
+r_build_args: --no-build-vignettes
+r_check_args: --as-cran --ignore-vignettes
 
 sudo: true
 cache: packages
