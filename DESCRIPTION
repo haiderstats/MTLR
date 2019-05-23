@@ -19,6 +19,7 @@ Suggests:
     ggplot2 (>= 3.0.0),
     reshape2 (>= 1.4.3),
     testthat,
+    vdiffr (>= 0.3.0),
     covr,
     knitr,
     rmarkdown

@@ -12,7 +12,8 @@ testthat::test_that("print and plot functions are consistent for basic survival 
   data <- survival::lung
   mod <- mtlr(formula, data)
   expect_equal_to_reference(print(mod),"print.rds")
-  expect_equal_to_reference(plot(mod),"plot.rds" )
+  basePlot <- plot(mod)
+  vdiffr::expect_doppelganger("basePlot", basePlot)
 
   data <- survival::leukemia
   mod <- mtlr(formula, data)
