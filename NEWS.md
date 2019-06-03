@@ -1,3 +1,9 @@
+# MTLR 0.2.1
+* Added the option to obtain survival probabilities at specified times (see `predict` with `type = "prob_times"`).
+* When using `predict` with  "prob_event" there is no longer a linear extension added if the survival curve never reaches 0. The linear extension is still present in the "mean_time" and "median_time" options however.
+* Internally some `sapply` commands were refactored so to not iterate over indexes.
+* Tests were changed as to not clash with future ggplot2 updates -- tests were checking against internal structures as opposed to visual differences.
+
 # MTLR 0.2.0
 * Added an option to optimize concordance instead of the log-likelihood when selecting a value for C1 in `mtlr_cv`.
 * Removed ellipses from `create_folds` since it's easy to use `type` instead of `foldtype` when passing in arguments.
