@@ -98,6 +98,7 @@ mtlr_cv <- function(formula,
                       normalize, C1_vec[i], train_biases,train_uncensored, seed_weights,
                       threshold, maxit, lower, upper)
           parList[[i]] <- c(mod$weight_matrix)
+          time_points = mod$time_points
         }else{
           mod <- mtlr(formula,datacv,time_points,nintervals,
                       normalize, C1_vec[i], train_biases,train_uncensored, parList[[i]],
