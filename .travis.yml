@@ -24,7 +24,7 @@ r_packages:
   - covr
 
 before_install:
-- Rscript -e 'install.packages(cairo)'
+- Rscript -e 'install.packages("cairo"")'
 
 after_success:
   - Rscript -e 'covr::codecov()'
