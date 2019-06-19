@@ -16,6 +16,7 @@ sudo: true
 cache: packages
 
 matrix:
+  env: VDIFFR_RUN_TESTS=false
   exclude:
   - os: osx
     r: devel
