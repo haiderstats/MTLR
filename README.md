@@ -24,7 +24,7 @@ devtools::install_github("haiderstats/MTLR")
 Example
 -------
 
-Given a survival dataset containing event time and event status indicator (censored/uncensored) we can produce an MTLR model. For example, consider the `lung` dataset from the `survival` package:
+Given a survival dataset containing event time and event status indicator (censored/uncensored), we can produce an MTLR model. For example, consider the `lung` dataset from the `survival` package:
 
 ``` r
 # Load survival for the lung dataset and the Surv() function.
