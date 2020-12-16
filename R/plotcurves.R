@@ -55,7 +55,7 @@ plotcurves <- function(curves, index = 1, color = c(), xlim = c(), remove_legend
   ))
   plot_data <- cbind.data.frame(plot_times,plot_probs)
   plot_data <- reshape2::melt(plot_data,measure.vars = names(plot_data)[-1], variable.name = "Index")
-  pl <- ggplot2::ggplot(data = plot_data, ggplot2::aes(x = plot_times,y = value, colour = Index))+
+  pl <- ggplot2::ggplot(data = plot_data, ggplot2::aes_string(x = "plot_times",y = "value", colour = "Index"))+
     ggplot2::geom_line(size = 1.5)
   if(colorOK)
     pl <- pl + ggplot2::scale_color_manual(values = color)
