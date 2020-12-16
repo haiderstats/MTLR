@@ -4,8 +4,7 @@
 \alias{plotcurves}
 \title{Graphically Visualize MTLR Survival Curves}
 \usage{
-plotcurves(curves, index = 1, color = c(), xlim = c(),
-  remove_legend = TRUE)
+plotcurves(curves, index = 1, color = c(), xlim = c(), remove_legend = TRUE)
 }
 \arguments{
 \item{curves}{survival curves formatted the same as those from predict.mtlr. Time points must be in the first column of the matrix followed by

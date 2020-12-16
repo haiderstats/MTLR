@@ -4,12 +4,26 @@
 \alias{mtlr_cv}
 \title{MTLR Internal Cross-Validation for Selecting C1.}
 \usage{
-mtlr_cv(formula, data, time_points = NULL, nintervals = NULL,
-  normalize = T, C1_vec = c(0.001, 0.01, 0.1, 1, 10, 100, 1000),
-  train_biases = T, train_uncensored = T, seed_weights = NULL,
-  previous_weights = T, loss = c("ll", "concordance"), nfolds = 5,
-  foldtype = c("fullstrat", "censorstrat", "random"), verbose = FALSE,
-  threshold = 1e-05, maxit = 5000, lower = -15, upper = 15)
+mtlr_cv(
+  formula,
+  data,
+  time_points = NULL,
+  nintervals = NULL,
+  normalize = T,
+  C1_vec = c(0.001, 0.01, 0.1, 1, 10, 100, 1000),
+  train_biases = T,
+  train_uncensored = T,
+  seed_weights = NULL,
+  previous_weights = T,
+  loss = c("ll", "concordance"),
+  nfolds = 5,
+  foldtype = c("fullstrat", "censorstrat", "random"),
+  verbose = FALSE,
+  threshold = 1e-05,
+  maxit = 5000,
+  lower = -15,
+  upper = 15
+)
 }
 \arguments{
 \item{formula}{a formula object with the response to the left of the "~" operator. The response must be a survival object returned

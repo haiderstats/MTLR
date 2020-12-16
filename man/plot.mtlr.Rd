@@ -4,8 +4,7 @@
 \alias{plot.mtlr}
 \title{Graphical Representation of Feature Weights}
 \usage{
-\method{plot}{mtlr}(x, numfeatures = 5, featurenames = c(), digits,
-  ...)
+\method{plot}{mtlr}(x, numfeatures = 5, featurenames = c(), digits, ...)
 }
 \arguments{
 \item{x}{an object of class mtlr (result from calling \code{\link[MTLR]{mtlr}}).}

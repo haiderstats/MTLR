@@ -4,8 +4,12 @@
 \alias{create_folds}
 \title{Create folds for cross-validation.}
 \usage{
-create_folds(time, delta, nfolds, foldtype = c("fullstrat",
-  "censorstrat", "random"))
+create_folds(
+  time,
+  delta,
+  nfolds,
+  foldtype = c("fullstrat", "censorstrat", "random")
+)
 }
 \arguments{
 \item{time}{a vector of event times.}

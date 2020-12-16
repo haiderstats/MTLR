@@ -4,10 +4,21 @@
 \alias{mtlr}
 \title{Train a Multi-Task Logistic Regression (MTLR) Model}
 \usage{
-mtlr(formula, data, time_points = NULL, nintervals = NULL,
-  normalize = T, C1 = 1, train_biases = T, train_uncensored = T,
-  seed_weights = NULL, threshold = 1e-05, maxit = 5000,
-  lower = -15, upper = 15)
+mtlr(
+  formula,
+  data,
+  time_points = NULL,
+  nintervals = NULL,
+  normalize = T,
+  C1 = 1,
+  train_biases = T,
+  train_uncensored = T,
+  seed_weights = NULL,
+  threshold = 1e-05,
+  maxit = 5000,
+  lower = -15,
+  upper = 15
+)
 }
 \arguments{
 \item{formula}{a formula object with the response to the left of the "~" operator. The response must be a survival object returned
