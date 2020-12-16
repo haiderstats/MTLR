@@ -16,8 +16,9 @@ knitr::opts_chunk$set(
 ```
 
 # MTLR
-[![Build Status](https://travis-ci.org/haiderstats/MTLR.svg?branch=master)](https://travis-ci.org/haiderstats/MTLR)
+[![R-CMD-check](https://github.com/haiderstats/MTLR/workflows/R-CMD-check/badge.svg)](https://github.com/haiderstats/MTLR/actions)
 [![codecov](https://codecov.io/gh/haiderstats/MTLR/branch/master/graphs/badge.svg)](https://codecov.io/gh/haiderstats/MTLR) 
+![](http://cranlogs.r-pkg.org/badges/grand-total/MTLR)
 
 The goal of `MTLR` is to provide an R implementation for [Multi-Task Logistic Regression](https://papers.nips.cc/paper/4210-learning-patient-specific-cancer-survival-distributions-as-a-sequence-of-dependent-regressors). In addition to supplying the model provided by [Yu et al.](https://papers.nips.cc/paper/4210-learning-patient-specific-cancer-survival-distributions-as-a-sequence-of-dependent-regressors) we have extended the model for left censoring, interval censoring, and a mixture of censoring types. Functionality includes training an MTLR model, predicting survival curves for new observations, and plotting these survival curves and feature weights estimated by MTLR.
 
