@@ -9,3 +9,4 @@
 ^README-.*\.png$
 ^cran-comments.md
 ^revdep$
+^\.github$
