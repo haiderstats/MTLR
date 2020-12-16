@@ -60,10 +60,12 @@ plotcurves <- function(curves, index = 1, color = c(), xlim = c(), remove_legend
   if(colorOK)
     pl <- pl + ggplot2::scale_color_manual(values = color)
   if(length(xlim)==2){
-    pl <- pl+ ggplot2::xlim(c(xlim[1],xlim[2]))
+    pl <- pl+ ggplot2::coord_cartesian(xlim =c(xlim[1],xlim[2]), ylim= c(0,1))
+  } else {
+    pl <- pl + ggplot2::coord_cartesian(ylim= c(0,1))
   }
   pl <- pl +
-    ggplot2::scale_y_continuous( limits= c(0,1),breaks = c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1))+
+    ggplot2::scale_y_continuous(breaks = c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1))+
     ggplot2::theme_bw() +
     ggplot2::theme(
           text = ggplot2::element_text(size=18, face=  "bold"),
