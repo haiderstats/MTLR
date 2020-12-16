@@ -1,4 +1,8 @@
 # MTLR 0.2.1
+* Updated the usage of ggplot2 to remove warnings about using plot objects.
+* Conditionally use vdiffr in tests.
+
+# MTLR 0.2.1
 * Added the option to obtain survival probabilities at specified times (see `predict` with `type = "prob_times"`).
 * When using `predict` with  "prob_event" there is no longer a linear extension added if the survival curve never reaches 0. The linear extension is still present in the "mean_time" and "median_time" options however.
 * Internally some `sapply` commands were refactored so to not iterate over indexes.
