@@ -27,11 +27,11 @@ testthat::test_that("mtlr_cv function is consistent for more complex survival da
   data <- survival::lung
   skip_on_cran()
   skip_on_travis()
-  expect_equal_to_reference(mtlr_cv(formula,data),"mtlrcv_lung.rds")
+  expect_equal_to_reference(mtlr_cv(formula,data),"mtlrcv_lung.rds", tolerance = 1e-3)
   data$status <- 0
-  expect_equal_to_reference(mtlr_cv(formula,data),"mtlrcv_censored.rds")
+  expect_equal_to_reference(mtlr_cv(formula,data),"mtlrcv_censored.rds", tolerance = 1e-3)
   data$status <- 1
-  expect_equal_to_reference(mtlr_cv(formula,data),"mtlrcv_uncensored.rds")
+  expect_equal_to_reference(mtlr_cv(formula,data),"mtlrcv_uncensored.rds", tolerance = 1e-3)
 })
 
 testthat::test_that("mtlr_cv function catches errors survival dataset",{
@@ -54,7 +54,7 @@ testthat::test_that("mtlr_cv function works with multiple types of censoring",{
   formula <- survival::Surv(time1,time2,type = "interval2")~.
   skip_on_cran()
   skip_on_travis()
-  expect_equal_to_reference(mtlr_cv(formula, dat, C1_vec = c(.001,.01,.1,0), previous_weights=F ),"mtlrcv_mixed_censoring.rds")
+  expect_equal_to_reference(mtlr_cv(formula, dat, C1_vec = c(.001,.01,.1,0), previous_weights=F ),"mtlrcv_mixed_censoring.rds", tolerance = 1e-3)
 })
 
 
