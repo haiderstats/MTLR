@@ -1,3 +1,5 @@
+# MTLR 0.2.3
+
 # MTLR 0.2.2
 * Updated the usage of ggplot2 to remove warnings about using plot objects.
 * Conditionally use vdiffr in tests.

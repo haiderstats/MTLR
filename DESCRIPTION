@@ -1,9 +1,11 @@
 Package: MTLR
 Type: Package
 Title: Survival Prediction with Multi-Task Logistic Regression
-Version: 0.2.2
-Author: Humza Haider
-Maintainer: Humza Haider <humza@haiderstats.com>
+Version: 0.2.3
+Authors@R: person(given = "Humza",
+                  family = "Haider",
+                  role = c("aut", "cre"),
+                  email = "humzahaider0@gmail.com")
 URL: https://github.com/haiderstats/MTLR
 BugReports: https://github.com/haiderstats/MTLR/issues
 Description: An implementation of Multi-Task Logistic Regression (MTLR) for R. 
@@ -11,7 +13,6 @@ Description: An implementation of Multi-Task Logistic Regression (MTLR) for R.
   by learning feature weights which vary across time. This model was further extended to account for left and interval censored data.
 License: GPL-2 | file LICENSE
 Encoding: UTF-8
-LazyData: true
 Imports:
     Rcpp (>= 0.12.18),
     survival (>= 2.4.0)
