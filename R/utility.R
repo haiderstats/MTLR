@@ -180,6 +180,7 @@ loglik_loss <- function(object, newdata){
   return(logloss/nrow(newdata))
 }
 
+#' @importFrom rlang .data
 
 concordance_loss <- function(object, newdata){
   #Get the survival curves for all observations.
@@ -187,7 +188,7 @@ concordance_loss <- function(object, newdata){
   Terms <- object$Terms
   mf <- stats::model.frame(Terms, data=newdata,xlev=object$xlevels)
   response <- stats::model.response(mf)
-  conc <- -1*unname(survival::survConcordance(response~preds)$concordance)
+  conc <- -1*unname(survival::concordance(response~I(-preds))$concordance)
   return(conc)
 }
 

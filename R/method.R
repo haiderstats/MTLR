@@ -168,12 +168,12 @@ plot.mtlr <- function(x, numfeatures=5, featurenames = c(), digits, ...) {
     chr_time <- as.character(round(time_points,digits))
     plot_data <- cbind.data.frame(time = chr_time, plot_weights)
     plot_data <- reshape2::melt(plot_data,id.vars = "time")
-    ggplot2::ggplot(plot_data, ggplot2::aes_string(x = "time",
-                                            y = "value",
-                                            group = "variable",
-                                            color = "variable")) +
+    ggplot2::ggplot(plot_data, ggplot2::aes(x = .data[["time"]],
+                                            y = .data[["value"]],
+                                            group = .data[["variable"]],
+                                            color = .data[["variable"]])) +
       ggplot2::geom_point(size = 2.5) +
-      ggplot2::geom_line(size = 1.25) +
+      ggplot2::geom_line(linewidth = 1.25) +
       ggplot2::scale_x_discrete("Event Time", limits = chr_time)+
       ggplot2::theme_bw() +
       ggplot2::labs(y = "Weight", color = "Feature") +

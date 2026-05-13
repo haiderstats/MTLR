@@ -6,6 +6,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // mtlr_objVal
 double mtlr_objVal(arma::rowvec params, arma::mat yval, arma::mat featureValue, double C1, arma::vec delta);
 RcppExport SEXP _MTLR_mtlr_objVal(SEXP paramsSEXP, SEXP yvalSEXP, SEXP featureValueSEXP, SEXP C1SEXP, SEXP deltaSEXP) {

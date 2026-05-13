@@ -1,7 +1,7 @@
 Package: MTLR
 Type: Package
 Title: Survival Prediction with Multi-Task Logistic Regression
-Version: 0.2.3
+Version: 0.2.2
 Authors@R: person(given = "Humza",
                   family = "Haider",
                   role = c("aut", "cre"),
@@ -15,9 +15,10 @@ License: GPL-2 | file LICENSE
 Encoding: UTF-8
 Imports:
     Rcpp (>= 0.12.18),
-    survival (>= 2.4.0)
+    survival (>= 3.0.0),
+    rlang
 Suggests:
-    ggplot2 (>= 3.0.0),
+    ggplot2 (>= 3.4.0),
     reshape2 (>= 1.4.3),
     testthat,
     vdiffr (>= 0.3.0),
@@ -25,8 +26,8 @@ Suggests:
     knitr,
     rmarkdown
 Depends: R (>= 3.4.0)
-RoxygenNote: 7.1.1
 LinkingTo:
     Rcpp,
     RcppArmadillo
 VignetteBuilder: knitr
+Config/roxygen2/version: 8.0.0

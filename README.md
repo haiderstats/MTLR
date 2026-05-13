@@ -4,7 +4,7 @@
 # MTLR
 
 [![R-CMD-check](https://github.com/haiderstats/MTLR/workflows/R-CMD-check/badge.svg)](https://github.com/haiderstats/MTLR/actions)
-[![codecov](https://codecov.io/gh/haiderstats/MTLR/branch/master/graphs/badge.svg)](https://codecov.io/gh/haiderstats/MTLR)
+[![codecov](https://codecov.io/gh/haiderstats/MTLR/branch/master/graphs/badge.svg)](https://app.codecov.io/gh/haiderstats/MTLR)
 ![](http://cranlogs.r-pkg.org/badges/grand-total/MTLR)
 
 The goal of `MTLR` is to provide an R implementation for [Multi-Task
@@ -67,7 +67,7 @@ print(mod)
 plot(mod)
 ```
 
-<img src="man/figures/README-example-1.png" style="display: block; margin: auto;" />
+<img src="man/figures/README-example-1.png" alt="" style="display: block; margin: auto;" />
 
 ``` r
 #Get survival curves for the lung dataset:
@@ -76,4 +76,4 @@ curves <- predict(mod)
 plotcurves(curves, 1:20)
 ```
 
-<img src="man/figures/README-example-2.png" style="display: block; margin: auto;" />
+<img src="man/figures/README-example-2.png" alt="" style="display: block; margin: auto;" />

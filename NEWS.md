@@ -1,7 +1,7 @@
-# MTLR 0.2.3
-
 # MTLR 0.2.2
-* Updated the usage of ggplot2 to remove warnings about using plot objects.
+* Update Author contact.
+* Remove LazyData from build.
+* Remove deprecated functions and update dependencies.
 * Conditionally use vdiffr in tests.
 
 # MTLR 0.2.1
